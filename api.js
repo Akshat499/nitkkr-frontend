@@ -10,6 +10,7 @@ const API = (() => {
   const BASE_URL = 'https://nitkkr-backend.onrender.com'; // No trailing slash!
   const TOKEN_KEY = 'nitkkr_jwt_token';
   const SESSION_KEY = 'nitkkr_session';
+  const LAST_ACTIVE_KEY = 'nitkkr_last_active';
 
   // ── TOKEN MANAGEMENT ────────────────────────
   function getToken() {
@@ -23,6 +24,7 @@ const API = (() => {
   function clearToken() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(LAST_ACTIVE_KEY);
   }
 
   function isLoggedIn() {
@@ -36,6 +38,11 @@ const API = (() => {
 
   function setSession(data) {
     localStorage.setItem(SESSION_KEY, JSON.stringify(data));
+    touchActivity();
+  }
+
+  function touchActivity() {
+    localStorage.setItem(LAST_ACTIVE_KEY, Date.now().toString());
   }
 
   // ── HTTP HELPERS ────────────────────────────

@@ -124,6 +124,11 @@
     (function () {
       const session = Auth.getSession();
       if (session) {
+        // If session is expired, clear it and stay on login page
+        if (Auth.isSessionExpired()) {
+          Auth.logout();
+          return;
+        }
         if (session.role === 'admin')   window.location.href = 'dashboard-admin.html';
         else if (session.role === 'teacher') window.location.href = 'dashboard-teacher.html';
       }

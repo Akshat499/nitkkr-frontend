@@ -55,7 +55,20 @@ const Auth = (() => {
 
   function getSession() {
     const s = localStorage.getItem(SESSION_KEY);
-    return s ? JSON.parse(s) : null;
+    if (!s) return null;
+    
+    // Check if session is expired
+    if (isSessionExpired()) {
+      clearSession();
+      return null;
+    }
+    
+    try {
+      return JSON.parse(s);
+    } catch {
+      clearSession();
+      return null;
+    }
   }
 
   function clearSession() {

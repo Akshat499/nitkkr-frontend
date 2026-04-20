@@ -7,7 +7,7 @@
 const API = (() => {
 
   // ── CONFIG ──────────────────────────────────
-  const BASE_URL = 'https://nitkkr-backend.onrender.com/';  // Change to your backend URL in production
+  const BASE_URL = 'https://nitkkr-backend.onrender.com';  // Change to your backend URL in production
   const TOKEN_KEY = 'nitkkr_jwt_token';
   const SESSION_KEY = 'nitkkr_session';
 

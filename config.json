@@ -1,0 +1,10 @@
+{
+  "admin": {
+    "email": "admin@nitkkr.ac.in",
+    "password": "admin@123"
+  },
+  "teachers": [
+    { "email": "prof.sharma@nitkkr.ac.in", "password": "teacher@123", "name": "Prof. Sharma", "department": "CSE" },
+    { "email": "dr.gupta@nitkkr.ac.in",    "password": "teacher@123", "name": "Dr. Gupta",    "department": "ECE" }
+  ]
+}

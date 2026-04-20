@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard — NIT KKR</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Extra Student Styles ── */
+    .resource-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+    .resource-tab { padding:8px 18px; border-radius:99px; font-size:13px; font-weight:600; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#aaa; cursor:pointer; transition:.2s; }
+    .resource-tab.active, .resource-tab:hover { background:var(--clr-primary); border-color:var(--clr-primary); color:#fff; }
+    .material-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:20px; margin-bottom:12px; transition:.2s; }
+    .material-card:hover { border-color:rgba(108,99,255,0.3); }
+    .material-card__title { font-size:15px; font-weight:700; color:#fff; margin-bottom:6px; }
+    .material-card__meta { font-size:12px; color:#888; margin-bottom:12px; }
+    .material-card__actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .tag-unit { background:rgba(34,197,94,0.1); color:#22c55e; border:1px solid rgba(34,197,94,0.25); padding:2px 8px; border-radius:99px; font-size:10px; font-weight:700; }
+    .tag-lab { background:rgba(251,146,60,0.1); color:#fb923c; border:1px solid rgba(251,146,60,0.25); padding:2px 8px; border-radius:99px; font-size:10px; font-weight:700; }
+    .asgn-due--urgent .asgn-modal__due-banner,.due-urgent { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:12px 16px; color:#f87171; font-size:13px; }
+    .asgn-due--normal .asgn-modal__due-banner,.due-normal { background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); border-radius:10px; padding:12px 16px; color:#4ade80; font-size:13px; }
+    .status--overdue { background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.25); padding:3px 10px; border-radius:99px; font-size:11px; font-weight:700; }
+    .status--today { background:rgba(251,146,60,0.12); color:#fb923c; border:1px solid rgba(251,146,60,0.25); padding:3px 10px; border-radius:99px; font-size:11px; font-weight:700; }
+    .status--soon { background:rgba(251,191,36,0.12); color:#fbbf24; border:1px solid rgba(251,191,36,0.25); padding:3px 10px; border-radius:99px; font-size:11px; font-weight:700; }
+    .status--active { background:rgba(34,197,94,0.12); color:#4ade80; border:1px solid rgba(34,197,94,0.25); padding:3px 10px; border-radius:99px; font-size:11px; font-weight:700; }
+    /* ── Result Extraction Styles ── */
+    .result-extract-box { background:rgba(108,99,255,0.06); border:1px solid rgba(108,99,255,0.2); border-radius:16px; padding:24px; margin-bottom:24px; }
+    .result-extract-box__title { font-size:16px; font-weight:700; color:#fff; margin-bottom:6px; }
+    .result-extract-box__sub { font-size:13px; color:#888; margin-bottom:18px; }
+    .result-extract-input-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .result-card { background:rgba(255,255,255,0.04); border:1px solid rgba(108,99,255,0.25); border-radius:14px; padding:20px; margin-top:16px; }
+    .result-card__header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+    .result-card__badge { background:linear-gradient(135deg,#6c63ff,#a89cff); color:#fff; padding:4px 12px; border-radius:99px; font-size:11px; font-weight:700; }
+    .result-card__student { font-size:17px; font-weight:800; color:#fff; }
+    .result-card__roll { font-size:12px; color:#888; }
+    .result-table { width:100%; border-collapse:collapse; margin-top:10px; }
+    .result-table th { font-size:11px; font-weight:700; color:#a89cff; text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid rgba(255,255,255,0.08); padding:8px 12px; text-align:left; }
+    .result-table td { font-size:13px; color:#ddd; padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .result-table tr:last-child td { border-bottom:none; }
+    .result-table .grade-pass { color:#4ade80; font-weight:700; }
+    .result-table .grade-fail { color:#f87171; font-weight:700; }
+    .result-summary { display:flex; gap:12px; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.07); }
+    .result-stat { background:rgba(255,255,255,0.04); border-radius:10px; padding:10px 16px; text-align:center; }
+    .result-stat__val { font-size:20px; font-weight:800; color:#a89cff; }
+    .result-stat__label { font-size:11px; color:#666; margin-top:2px; }
+    .result-files-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; margin-top:16px; }
+    .result-file-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:16px; transition:.2s; }
+    .result-file-card:hover { border-color:rgba(108,99,255,0.3); }
+    .result-file-card__title { font-size:13px; font-weight:700; color:#fff; margin-bottom:6px; }
+    .result-file-card__meta { font-size:11px; color:#888; margin-bottom:10px; line-height:1.6; }
+    .chat-source-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:99px; margin-bottom:6px; }
+    .chat-source-badge--result { background:rgba(34,197,94,0.12); color:#4ade80; border:1px solid rgba(34,197,94,0.25); }
+    .chat-source-badge--notification { background:rgba(251,191,36,0.12); color:#fbbf24; border:1px solid rgba(251,191,36,0.25); }
+    .chat-source-badge--announcement { background:rgba(251,146,60,0.12); color:#fb923c; border:1px solid rgba(251,146,60,0.25); }
+    .chat-source-badge--general { background:rgba(108,99,255,0.12); color:#a89cff; border:1px solid rgba(108,99,255,0.25); }
+    .ai-chat-suggestions { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .ai-suggestion-chip { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:99px; padding:6px 14px; font-size:12px; color:#aaa; cursor:pointer; transition:.15s; white-space:nowrap; }
+    .ai-suggestion-chip:hover { background:rgba(108,99,255,0.15); border-color:rgba(108,99,255,0.4); color:#fff; }
+    .assignment-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:20px; margin-bottom:12px; transition:.2s; cursor:pointer; }
+    .assignment-card:hover { border-color:rgba(108,99,255,0.3); transform:translateY(-2px); }
+    .assignment-card__header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:8px; }
+    .assignment-card__title { font-size:15px; font-weight:700; color:#fff; }
+    .assignment-card__meta { font-size:12px; color:#888; line-height:1.6; }
+    .assignment-card__desc { font-size:13px; color:#aaa; margin-top:8px; line-height:1.6; }
+    .asgn-modal { background:#13131f; border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:32px; max-width:680px; width:90%; max-height:90vh; overflow-y:auto; position:relative; margin:auto; top:50%; transform:translateY(-50%); }
+    .asgn-modal__header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:20px; }
+    .asgn-modal__title { font-size:22px; font-weight:800; color:#fff; margin-bottom:8px; }
+    .asgn-modal__meta { font-size:13px; color:#888; }
+    .asgn-modal__due-banner { border-radius:10px; padding:12px 16px; font-size:13px; margin-bottom:16px; }
+    .asgn-modal__desc { font-size:14px; color:#ccc; line-height:1.8; background:rgba(255,255,255,0.03); border-radius:10px; padding:16px; margin-bottom:16px; white-space:pre-wrap; }
+    .asgn-modal__attachment { margin-top:16px; }
+    .asgn-modal__attach-label { font-size:12px; font-weight:700; color:#a89cff; margin-bottom:8px; text-transform:uppercase; letter-spacing:.08em; }
+    .notif-item { display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-radius:12px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); transition:.2s; }
+    .notif-item--unread { background:rgba(108,99,255,0.06); border-color:rgba(108,99,255,0.2); }
+    .notif-item__icon { font-size:20px; flex-shrink:0; margin-top:2px; }
+    .notif-item__info { flex:1; }
+    .notif-item__text { font-size:13px; color:#ddd; line-height:1.5; margin:0 0 4px; }
+    .notif-item__time { font-size:11px; color:#666; }
+    .notif-dismiss { color:#555; font-size:12px; flex-shrink:0; background:none; border:none; cursor:pointer; padding:4px 6px; border-radius:6px; transition:.2s; }
+    .notif-dismiss:hover { background:rgba(239,68,68,0.12); color:#ef4444; }
+    .announcements-list { display:flex; flex-direction:column; gap:12px; }
+    .ann-card { background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.2); border-radius:12px; padding:16px; }
+    .ann-card__title { font-size:14px; font-weight:700; color:#fbbf24; margin-bottom:6px; }
+    .ann-card__body { font-size:13px; color:#ccc; line-height:1.6; }
+    .ann-card__meta { font-size:11px; color:#888; margin-top:8px; }
+    .ann-type--urgent { background:rgba(239,68,68,0.06); border-color:rgba(239,68,68,0.25); }
+    .ann-type--urgent .ann-card__title { color:#f87171; }
+  </style>
+</head>
+<body id="body-dashboard" class="page-dashboard page-dashboard--student">
+
+  <!-- ASK AI MODAL -->
+  <div id="ask-ai-overlay" class="ask-ai-overlay hidden">
+    <div id="ask-ai-modal" class="ask-ai-modal">
+      <div class="ask-ai-modal__header">
+        <div class="ask-ai-modal__header-left">
+          <span class="ask-ai-modal__icon">⬡</span>
+          <div>
+            <h3 class="ask-ai-modal__title">NeuralAssist™</h3>
+            <p class="ask-ai-modal__subtitle" id="ask-ai-subtitle">NIT KKR · LangChain RAG + Groq</p>
+          </div>
+        </div>
+        <button id="ask-ai-close" class="ask-ai-modal__close">✕</button>
+      </div>
+      <div class="ask-ai-question-card">
+        <div class="ask-ai-question-card__label">
+          <span class="ask-ai-question-card__badge" id="ask-ai-q-badge">Q.1</span>
+          <span class="ask-ai-question-card__meta" id="ask-ai-q-meta">Subject • Branch</span>
+        </div>
+        <p class="ask-ai-question-card__text" id="ask-ai-q-text">Question text...</p>
+      </div>
+      <div id="ask-ai-chat" class="ask-ai-chat">
+        <div class="chat-msg chat-msg--ai">
+          <span class="chat-msg__avatar">⬡</span>
+          <div class="chat-msg__bubble">Hi! I'm <strong>NeuralAssist™</strong> — your LangChain-powered AI tutor. I have the question loaded. What's your doubt?</div>
+        </div>
+      </div>
+      <div class="ask-ai-input-bar">
+        <input type="text" id="ask-ai-input" class="form-input" placeholder="Type your doubt about this question..." />
+        <button id="ask-ai-send" class="btn btn--primary">Send ↑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSIGNMENT DETAIL MODAL -->
+  <div id="asgn-modal-overlay" class="ask-ai-overlay hidden">
+    <div class="asgn-modal">
+      <div class="asgn-modal__header">
+        <div>
+          <div id="asgn-modal-tags" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
+          <h2 id="asgn-modal-title" class="asgn-modal__title"></h2>
+          <p id="asgn-modal-meta" class="asgn-modal__meta"></p>
+        </div>
+        <button id="asgn-modal-close" class="btn btn--ghost btn--sm">✕ Close</button>
+      </div>
+      <div id="asgn-modal-due-banner" class="asgn-modal__due-banner"></div>
+      <div id="asgn-modal-desc" class="asgn-modal__desc hidden"></div>
+      <div id="asgn-modal-attachment" class="asgn-modal__attachment hidden">
+        <div class="asgn-modal__attach-label">📎 Attachment</div>
+        <div id="asgn-modal-attach-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar sidebar--student">
+    <div class="sidebar__logo">
+      <span class="navbar__logo-icon">⬡</span>
+      <span class="sidebar__logo-text">NIT<span class="navbar__logo-accent">KKR</span></span>
+    </div>
+    <div class="sidebar__user">
+      <div class="sidebar__avatar">👤</div>
+      <div class="sidebar__user-info">
+        <span class="sidebar__user-name">Guest Student</span>
+        <span class="sidebar__user-role">Open Access • No Login</span>
+      </div>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="#" class="sidebar__nav-item sidebar__nav-item--active" data-section="home">
+        <span class="sidebar__nav-icon">🏠</span> Home
+      </a>
+      <a href="#" class="sidebar__nav-item" data-section="search">
+        <span class="sidebar__nav-icon">🔍</span> Search PYQs
+      </a>
+      <a href="#" class="sidebar__nav-item" data-section="resources">
+        <span class="sidebar__nav-icon">📚</span> Study Resources
+      </a>
+      <a href="#" class="sidebar__nav-item" data-section="assignments">
+        <span class="sidebar__nav-icon">📝</span> Assignments
+        <span class="sidebar__badge" id="asgn-badge" style="display:none;">0</span>
+      </a>
+      <a href="#" class="sidebar__nav-item" data-section="notifications">
+        <span class="sidebar__nav-icon">🔔</span> Notifications
+        <span class="sidebar__badge" id="notif-badge" style="display:none;">0</span>
+      </a>
+      <a href="#" class="sidebar__nav-item" data-section="announcements">
+        <span class="sidebar__nav-icon">📢</span> Announcements
+      </a>
+      <a href="#" class="sidebar__nav-item" data-section="bookmarks">
+        <span class="sidebar__nav-icon">🔖</span> Bookmarks
+      </a>
+      <a href="#" class="sidebar__nav-item" data-section="todo">
+        <span class="sidebar__nav-icon">✅</span> To-Do
+      </a>
+      <a href="#" class="sidebar__nav-item" data-section="results">
+        <span class="sidebar__nav-icon">📊</span> My Results
+      </a>
+      <a href="#" class="sidebar__nav-item" data-section="ai-chat">
+        <span class="sidebar__nav-icon">⚡</span> NeuralAssist™
+      </a>
+    </nav>
+    <div class="sidebar__footer-links">
+      <a href="index.html" class="sidebar__footer-link">← Back to Home</a>
+      <a href="login.html" class="sidebar__footer-link sidebar__footer-link--highlight">Teacher / Admin Login</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div id="dashboard-main" class="dashboard-main">
+    <div id="guest-banner" class="guest-banner">
+      👋 You're browsing as a <strong>Guest Student</strong> — Free access enabled &nbsp;|&nbsp;
+      <a href="login.html">Teacher or Admin? Login here →</a>
+    </div>
+    <!-- ANNOUNCEMENT TICKER (Fix #6) -->
+    <div id="ann-ticker-bar" style="background:linear-gradient(90deg,#0d1525,rgba(59,130,246,0.08),#0d1525);border-bottom:1px solid #1e3058;padding:0.4rem 1.5rem;display:flex;align-items:center;gap:1rem;overflow:hidden;">
+      <span style="font-size:0.65rem;font-weight:700;letter-spacing:1px;color:#3b82f6;text-transform:uppercase;white-space:nowrap;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);padding:0.2rem 0.5rem;border-radius:4px;">🔔 New</span>
+      <div style="flex:1;overflow:hidden;">
+        <div id="ticker-content" style="white-space:nowrap;animation:tickerMove 30s linear infinite;display:inline-block;font-size:0.8rem;color:#94a3b8;">Loading announcements…</div>
+      </div>
+    </div>
+    <style>@keyframes tickerMove{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}</style>
+    <header id="topbar" class="topbar">
+      <button id="sidebar-toggle" class="topbar__sidebar-toggle">☰</button>
+      <div id="topbar-title" class="topbar__title">Search PYQs</div>
+      <div class="topbar__actions">
+        <a href="login.html" class="btn btn--primary btn--sm">Teacher/Admin Login</a>
+      </div>
+    </header>
+
+    <div id="dashboard-content" class="dashboard-content">
+
+      <!-- ════ HOME DASHBOARD (Fix #4 #5) ════ -->
+      <section id="section-home" class="dash-section dash-section--active" data-section="home">
+        <style>
+          .home-hero{padding:8px 0 24px;}
+          .home-hero h1{font-size:clamp(1.4rem,3vw,2rem);font-weight:800;line-height:1.2;margin-bottom:6px;}
+          .home-hero h1 span{background:linear-gradient(135deg,#6c63ff,#a89cff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+          .home-hero p{font-size:13px;color:#888;}
+          .rag-pipeline{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px 16px;margin:16px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;overflow:hidden;position:relative;}
+          .rag-pipeline::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(108,99,255,0.04),transparent);animation:shimmer 3s infinite;}
+          @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+          .rag-tag{font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;letter-spacing:0.5px;}
+          .rag-groq{background:rgba(108,99,255,0.15);color:#a89cff;border:1px solid rgba(108,99,255,0.3);}
+          .rag-lc{background:rgba(6,214,160,0.1);color:#06d6a0;border:1px solid rgba(6,214,160,0.25);}
+          .rag-chroma{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.25);}
+          .rag-embed{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.25);}
+          .rag-arrow{color:#333;font-size:0.9rem;}
+          .rag-status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:0.68rem;color:#06d6a0;}
+          .rag-dot{width:6px;height:6px;border-radius:50%;background:#06d6a0;box-shadow:0 0 6px #06d6a0;animation:blink 2s infinite;}
+          @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+          .home-section-label{font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+          .home-section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0.07),transparent);}
+          /* AI-first grid */
+          .ai-cards-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:24px;}
+          .ai-cards-grid .pyq-row{grid-column:1/-1;}
+          @media(max-width:900px){.ai-cards-grid{grid-template-columns:1fr 1fr;}.ai-big-card{grid-column:span 2;}}
+          @media(max-width:600px){.ai-cards-grid{grid-template-columns:1fr;}.ai-big-card{grid-column:span 1;}}
+          .home-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;cursor:pointer;transition:.25s;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;}
+          .home-card:hover{transform:translateY(-3px);border-color:rgba(108,99,255,0.35);box-shadow:0 12px 40px rgba(0,0,0,0.4);}
+          .home-card::after{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;border-radius:50%;pointer-events:none;opacity:0.6;}
+          .hc-neural::after{background:radial-gradient(circle,rgba(108,99,255,0.15) 0%,transparent 70%);}
+          .hc-result::after{background:radial-gradient(circle,rgba(6,214,160,0.1) 0%,transparent 70%);}
+          .hc-policy::after{background:radial-gradient(circle,rgba(251,191,36,0.08) 0%,transparent 70%);}
+          .hc-pyq::after{background:radial-gradient(circle,rgba(59,130,246,0.1) 0%,transparent 70%);}
+          .hc-badge{display:inline-flex;align-items:center;gap:4px;font-size:0.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:20px;}
+          .badge-ai{background:rgba(108,99,255,0.15);color:#a89cff;border:1px solid rgba(108,99,255,0.3);}
+          .badge-rag{background:rgba(6,214,160,0.1);color:#06d6a0;border:1px solid rgba(6,214,160,0.25);}
+          .badge-result{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.25);}
+          .badge-pyq{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.25);}
+          .hc-title{font-size:1.05rem;font-weight:800;color:#fff;line-height:1.2;}
+          .ai-big-card .hc-title{font-size:1.25rem;}
+          .hc-desc{font-size:0.78rem;color:#888;line-height:1.5;}
+          .hc-arrow{font-size:0.75rem;color:#6c63ff;font-weight:600;margin-top:auto;}
+          /* Chat preview inside NeuralAssist card */
+          .mini-chat{background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px;flex:1;display:flex;flex-direction:column;gap:8px;}
+          .mc-bubble{font-size:0.75rem;padding:6px 10px;border-radius:8px;line-height:1.4;}
+          .mc-user{background:rgba(108,99,255,0.12);border:1px solid rgba(108,99,255,0.2);color:#ccc;align-self:flex-end;max-width:85%;}
+          .mc-ai{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);color:#aaa;max-width:90%;}
+          .typing-dots{display:inline-flex;gap:3px;padding:2px 0;}
+          .typing-dots span{width:4px;height:4px;border-radius:50%;background:#6c63ff;animation:td 1.2s infinite;}
+          .typing-dots span:nth-child(2){animation-delay:.2s;}
+          .typing-dots span:nth-child(3){animation-delay:.4s;}
+          @keyframes td{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+          .lc-live{display:flex;align-items:center;gap:5px;font-size:0.7rem;color:#555;margin-top:2px;}
+          /* PYQ hub sub-cards */
+          .pyq-hub-toggle{cursor:pointer;}
+          .pyq-sub-grid{display:none;grid-template-columns:repeat(3,1fr);gap:10px;grid-column:1/-1;background:rgba(0,0,0,0.15);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;}
+          .pyq-sub-grid.open{display:grid;}
+          .pyq-sub-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px;cursor:pointer;transition:.2s;display:flex;flex-direction:column;gap:6px;}
+          .pyq-sub-card:hover{border-color:rgba(251,191,36,0.4);transform:translateY(-2px);}
+          .pyq-sub-card .psc-icon{font-size:1.4rem;}
+          .pyq-sub-card .psc-title{font-size:0.85rem;font-weight:700;color:#fff;}
+          .pyq-sub-card .psc-desc{font-size:0.72rem;color:#888;line-height:1.4;}
+          @media(max-width:600px){.pyq-sub-grid.open{grid-template-columns:1fr;}}
+          /* Secondary cards */
+          .sec-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:24px;}
+          .sec-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;cursor:pointer;transition:.2s;display:flex;flex-direction:column;gap:8px;}
+          .sec-card:hover{transform:translateY(-2px);border-color:rgba(108,99,255,0.25);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+          /* Backend announcements in home */
+          .home-ann-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+          .home-ann-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.2s;}
+          .home-ann-item:hover{background:rgba(108,99,255,0.06);border-color:rgba(108,99,255,0.2);}
+          .ann-indicator{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+          .ann-new-dot{background:#3b82f6;box-shadow:0 0 6px #3b82f6;}
+          .ann-old-dot{background:#444;}
+          .home-ann-title{font-size:0.85rem;font-weight:500;color:#ddd;flex:1;}
+          .home-ann-meta{font-size:0.7rem;color:#555;white-space:nowrap;}
+          .ann-new-tag{font-size:0.6rem;font-weight:700;background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.25);padding:2px 6px;border-radius:4px;}
+        </style>
+
+        <div class="home-hero">
+          <h1>Welcome, <span id="home-greeting">Student</span> 👋</h1>
+          <p>Your AI-powered academic portal — ask anything, extract results, explore resources.</p>
+        </div>
+
+        <!-- RAG Pipeline Strip -->
+        <div class="rag-pipeline">
+          <span style="font-size:0.65rem;font-weight:700;letter-spacing:1px;color:#555;text-transform:uppercase;white-space:nowrap;">Powered by</span>
+          <span class="rag-tag rag-groq">🤖 Groq LLaMA 3.3</span>
+          <span class="rag-arrow">→</span>
+          <span class="rag-tag rag-lc">🔗 LangChain RAG</span>
+          <span class="rag-arrow">→</span>
+          <span class="rag-tag rag-embed">🧠 MiniLM Embeddings</span>
+          <span class="rag-arrow">→</span>
+          <span class="rag-tag rag-chroma">🗄 ChromaDB</span>
+          <div class="rag-status"><div class="rag-dot"></div>RAG Active</div>
+        </div>
+
+        <!-- AI-First Cards -->
+        <div class="home-section-label">🤖 AI & LangChain Features</div>
+        <div class="ai-cards-grid">
+
+          <!-- NeuralAssist™ Big Card -->
+          <div class="home-card hc-neural ai-big-card" onclick="goSection('ai-chat')">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span class="hc-badge badge-ai">🧠 AI Chat</span>
+              <span class="hc-badge badge-rag">LangChain RAG</span>
+            </div>
+            <div class="hc-title">⚡ NeuralAssist™</div>
+            <div class="hc-desc">Ask about results, policies, scholarships, attendance — auto-routes query across 3 ChromaDB vectorstores.</div>
+            <div class="mini-chat">
+              <div class="mc-bubble mc-user">What is the attendance policy for CSE?</div>
+              <div class="mc-bubble mc-ai"><div class="typing-dots"><span></span><span></span><span></span></div></div>
+            </div>
+            <div class="lc-live">
+              <div class="rag-dot" style="width:5px;height:5px;"></div>
+              LangChain RetrievalQA · 3 vectorstores · Groq LLaMA 3.3
+            </div>
+            <div class="hc-arrow">Open NeuralAssist™ →</div>
+          </div>
+
+          <!-- Result Extraction Card -->
+          <div class="home-card hc-result" onclick="goSection('results')">
+            <div class="hc-badge badge-result">📊 LLM Extraction</div>
+            <div class="hc-title">My Results</div>
+            <div class="hc-desc">Enter roll number — AI parses result PDFs and extracts your marks, grades & SGPA.</div>
+            <div class="hc-arrow">Extract Results →</div>
+          </div>
+
+          <!-- Policy RAG Card -->
+          <div class="home-card hc-policy" onclick="goSection('notifications')">
+            <div class="hc-badge badge-rag">📚 RAG Pipeline</div>
+            <div class="hc-title">Policy Search</div>
+            <div class="hc-desc">Semantic search over attendance, fee, internship & scholarship policy PDFs.</div>
+            <div class="hc-arrow">Search Policies →</div>
+          </div>
+
+          <!-- PYQ Hub (single card, expands to sub-cards) — Fix #8 -->
+          <div class="home-card hc-pyq pyq-hub-toggle" id="pyqHubCard" onclick="togglePyqHub()">
+            <div class="hc-badge badge-pyq">🗂 Resources Hub</div>
+            <div class="hc-title">PYQs, Notes & Lab Manuals</div>
+            <div class="hc-desc">Previous year papers, lecture notes, and lab manuals — all in one place.</div>
+            <div class="hc-arrow" id="pyqHubArrow">Explore Resources →</div>
+          </div>
+
+          <!-- PYQ Sub-cards -->
+          <div class="pyq-sub-grid" id="pyqSubGrid">
+            <div class="pyq-sub-card" onclick="event.stopPropagation();goSection('search')">
+              <div class="psc-icon">📝</div>
+              <div class="hc-badge badge-pyq" style="width:fit-content;">Exam Prep</div>
+              <div class="psc-title">Previous Year Papers</div>
+              <div class="psc-desc">Browse & filter PYQs by branch, semester, subject and year. Ask AI on any question.</div>
+            </div>
+            <div class="pyq-sub-card" onclick="event.stopPropagation();goSection('resources')">
+              <div class="psc-icon">📓</div>
+              <div class="hc-badge badge-rag" style="width:fit-content;">Study Material</div>
+              <div class="psc-title">Lecture Notes</div>
+              <div class="psc-desc">Curated notes uploaded by faculty, organized by branch and semester.</div>
+            </div>
+            <div class="pyq-sub-card" onclick="event.stopPropagation();goSection('resources')">
+              <div class="psc-icon">🔬</div>
+              <div class="hc-badge badge-result" style="width:fit-content;">Practicals</div>
+              <div class="psc-title">Lab Manuals</div>
+              <div class="psc-desc">Complete lab manuals and experiment guides for all practical subjects.</div>
+            </div>
+          </div>
+
+        </div><!-- /ai-cards-grid -->
+
+        <!-- Announcements (Fix #6) -->
+        <div class="home-section-label">📢 Live Announcements</div>
+        <div class="home-ann-list" id="homeAnnList">
+          <div style="color:#555;font-size:0.8rem;padding:10px;">⏳ Loading announcements from server…</div>
+        </div>
+
+        <!-- Secondary tools -->
+        <div class="home-section-label">🔧 More Tools</div>
+        <div class="sec-cards-grid">
+          <div class="sec-card" onclick="goSection('notifications')">
+            <span style="font-size:1.3rem;">🔔</span>
+            <div style="font-weight:600;font-size:0.85rem;">Notifications</div>
+            <div style="font-size:0.75rem;color:#666;">Circulars, exam schedules and official policy notices.</div>
+          </div>
+          <div class="sec-card" onclick="goSection('bookmarks')">
+            <span style="font-size:1.3rem;">🔖</span>
+            <div style="font-weight:600;font-size:0.85rem;">Bookmarks</div>
+            <div style="font-size:0.75rem;color:#666;">Saved papers and resources for quick access.</div>
+          </div>
+          <div class="sec-card" onclick="goSection('assignments')">
+            <span style="font-size:1.3rem;">📝</span>
+            <div style="font-weight:600;font-size:0.85rem;">Assignments</div>
+            <div style="font-size:0.75rem;color:#666;">Check pending assignments and due dates.</div>
+          </div>
+          <div class="sec-card" onclick="goSection('todo')">
+            <span style="font-size:1.3rem;">✅</span>
+            <div style="font-weight:600;font-size:0.85rem;">To-Do List</div>
+            <div style="font-size:0.75rem;color:#666;">Track your study tasks and goals.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════ SEARCH PYQs ════ -->
+      <section id="section-search" class="dash-section" data-section="search">
+        <div class="dash-section__header">
+          <div>
+            <h2 class="dash-section__title">Search PYQs</h2>
+            <p class="dash-section__subtitle">Browse previous year question papers by branch, semester and subject</p>
+          </div>
+        </div>
+
+        <div class="pyq-searchbar">
+          <div class="searchbar__wrapper">
+            <span class="searchbar__icon">🔍</span>
+            <input type="text" id="pyq-search-input" class="searchbar__input" placeholder="Search subject name, keyword, question text..." />
+            <button id="pyq-search-btn" class="btn btn--primary">Search</button>
+          </div>
+        </div>
+
+        <div id="pyq-filters" class="pyq-filters" style="margin-top:16px;">
+          <select id="filter-branch" class="form-select filter-select">
+            <option value="">Select Branch</option>
+            <option value="cse">CSE</option><option value="ece">ECE</option>
+            <option value="me">ME</option><option value="ee">EE</option>
+            <option value="ce">CE</option><option value="it">IT</option>
+            <option value="che">CHE</option><option value="mca">MCA</option><option value="mba">MBA</option>
+          </select>
+          <select id="filter-semester" class="form-select filter-select" disabled>
+            <option value="">Select Semester</option>
+          </select>
+          <select id="filter-subject" class="form-select filter-select" disabled>
+            <option value="">Select Subject</option>
+          </select>
+          <select id="filter-exam" class="form-select filter-select">
+            <option value="">Exam Type</option>
+            <option value="mid">Mid Semester</option>
+            <option value="end">End Semester</option>
+          </select>
+          <select id="filter-year" class="form-select filter-select">
+            <option value="">Year</option>
+            <option value="2025">2025</option><option value="2024">2024</option>
+            <option value="2023">2023</option><option value="2022">2022</option>
+            <option value="2021">2021</option><option value="2020">2020</option>
+          </select>
+          <button id="btn-clear-filters" class="btn btn--ghost btn--sm">✕ Clear</button>
+        </div>
+        <div id="filter-chips" class="filter-chips"></div>
+
+        <div id="pyq-results-area" style="margin-top:20px;">
+          <div id="state-default" class="pyq-state-box">
+            <div class="pyq-state-box__icon">📚</div>
+            <h3 class="pyq-state-box__title">Select a Branch to Begin</h3>
+            <p class="pyq-state-box__msg">Choose your branch, then semester and subject to browse PYQs. Or search by keyword above.</p>
+          </div>
+          <div id="state-coming-soon" class="pyq-state-box hidden">
+            <div class="pyq-state-box__icon">🚧</div>
+            <h3 class="pyq-state-box__title">No Papers Available Yet</h3>
+            <p class="pyq-state-box__msg" id="coming-soon-msg">No question paper available yet. Check back soon!</p>
+            <span class="coming-soon-badge">Coming Soon</span>
+          </div>
+          <div id="state-no-results" class="pyq-state-box hidden">
+            <div class="pyq-state-box__icon">🔍</div>
+            <h3 class="pyq-state-box__title">No Results Found</h3>
+            <p class="pyq-state-box__msg">Try adjusting your filters or search term.</p>
+          </div>
+          <div id="pyq-results-grid" class="pyq-results hidden"></div>
+        </div>
+      </section>
+
+      <!-- ════ STUDY RESOURCES ════ -->
+      <section id="section-resources" class="dash-section" data-section="resources">
+        <div class="dash-section__header">
+          <div>
+            <h2 class="dash-section__title">Study Resources</h2>
+            <p class="dash-section__subtitle">Notes, Lab Manuals, and other material uploaded by teachers</p>
+          </div>
+        </div>
+
+        <!-- Resource filters -->
+        <div class="pyq-filters" style="margin-bottom:16px;">
+          <select id="res-filter-branch" class="form-select filter-select">
+            <option value="">All Branches</option>
+            <option value="cse">CSE</option><option value="ece">ECE</option>
+            <option value="me">ME</option><option value="ee">EE</option>
+            <option value="ce">CE</option><option value="it">IT</option>
+            <option value="che">CHE</option><option value="mca">MCA</option><option value="mba">MBA</option>
+          </select>
+          <select id="res-filter-sem" class="form-select filter-select">
+            <option value="">All Semesters</option>
+            <option value="1">Sem 1</option><option value="2">Sem 2</option>
+            <option value="3">Sem 3</option><option value="4">Sem 4</option>
+            <option value="5">Sem 5</option><option value="6">Sem 6</option>
+            <option value="7">Sem 7</option><option value="8">Sem 8</option>
+          </select>
+          <button id="res-filter-btn" class="btn btn--primary btn--sm">Filter</button>
+          <button id="res-clear-btn" class="btn btn--ghost btn--sm">✕ Clear</button>
+        </div>
+
+        <div class="resource-tabs">
+          <button class="resource-tab active" data-rtab="notes">📒 Notes</button>
+          <button class="resource-tab" data-rtab="lab">🔬 Lab Manuals</button>
+        </div>
+
+        <div id="res-notes" class="res-panel">
+          <div id="notes-empty" class="pyq-state-box">
+            <div class="pyq-state-box__icon">📒</div>
+            <h3 class="pyq-state-box__title">No Notes Available Yet</h3>
+            <p class="pyq-state-box__msg">Teachers haven't uploaded notes yet. Check back soon!</p>
+          </div>
+          <div id="notes-list"></div>
+        </div>
+
+        <div id="res-lab" class="res-panel hidden">
+          <div id="lab-empty" class="pyq-state-box">
+            <div class="pyq-state-box__icon">🔬</div>
+            <h3 class="pyq-state-box__title">No Lab Manuals Available Yet</h3>
+            <p class="pyq-state-box__msg">Teachers haven't uploaded lab manuals yet. Check back soon!</p>
+          </div>
+          <div id="lab-list"></div>
+        </div>
+      </section>
+
+      <!-- ════ ASSIGNMENTS ════ -->
+      <section id="section-assignments" class="dash-section" data-section="assignments">
+        <div class="dash-section__header">
+          <div>
+            <h2 class="dash-section__title">Assignments</h2>
+            <p class="dash-section__subtitle">Assignments posted by your teachers — check due dates and download attachments</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <select id="asgn-filter-branch" class="form-select" style="width:120px;font-size:13px;">
+              <option value="">All Branches</option>
+              <option value="cse">CSE</option><option value="ece">ECE</option>
+              <option value="me">ME</option><option value="ee">EE</option>
+              <option value="ce">CE</option><option value="it">IT</option>
+              <option value="che">CHE</option><option value="mca">MCA</option><option value="mba">MBA</option>
+            </select>
+            <select id="asgn-filter-sem" class="form-select" style="width:110px;font-size:13px;">
+              <option value="">All Sems</option>
+              <option value="1">Sem 1</option><option value="2">Sem 2</option>
+              <option value="3">Sem 3</option><option value="4">Sem 4</option>
+              <option value="5">Sem 5</option><option value="6">Sem 6</option>
+              <option value="7">Sem 7</option><option value="8">Sem 8</option>
+            </select>
+          </div>
+        </div>
+        <div id="asgn-empty" class="pyq-state-box">
+          <div class="pyq-state-box__icon">📝</div>
+          <h3 class="pyq-state-box__title">No Assignments Yet</h3>
+          <p class="pyq-state-box__msg">Teachers haven't posted any assignments yet.</p>
+        </div>
+        <div id="asgn-list" class="hidden"></div>
+      </section>
+
+      <!-- ════ NOTIFICATIONS ════ -->
+      <section id="section-notifications" class="dash-section" data-section="notifications">
+        <div class="dash-section__header">
+          <div>
+            <h2 class="dash-section__title">Notifications</h2>
+            <p class="dash-section__subtitle">New uploads and updates from teachers</p>
+          </div>
+          <button id="btn-mark-all-read" class="btn btn--ghost btn--sm">✓ Mark all read</button>
+        </div>
+        <div id="notif-empty" class="pyq-state-box hidden">
+          <div class="pyq-state-box__icon">🔔</div>
+          <h3 class="pyq-state-box__title">No Notifications</h3>
+          <p class="pyq-state-box__msg">When a teacher uploads content, you'll see it here.</p>
+        </div>
+        <div id="notifications-list" class="notifications-list"></div>
+      </section>
+
+      <!-- ════ ANNOUNCEMENTS ════ -->
+      <section id="section-announcements" class="dash-section" data-section="announcements">
+        <div class="dash-section__header">
+          <div>
+            <h2 class="dash-section__title">Announcements</h2>
+            <p class="dash-section__subtitle">Official announcements from teachers and admin</p>
+          </div>
+        </div>
+        <div id="ann-empty" class="pyq-state-box">
+          <div class="pyq-state-box__icon">📢</div>
+          <h3 class="pyq-state-box__title">No Announcements</h3>
+          <p class="pyq-state-box__msg">No announcements at this time.</p>
+        </div>
+        <div id="ann-list" class="announcements-list hidden"></div>
+      </section>
+
+      <!-- ════ BOOKMARKS ════ -->
+      <section id="section-bookmarks" class="dash-section" data-section="bookmarks">
+        <div class="dash-section__header">
+          <div>
+            <h2 class="dash-section__title">Bookmarks</h2>
+            <p class="dash-section__subtitle">Your saved question papers</p>
+          </div>
+          <button id="btn-clear-bookmarks" class="btn btn--ghost btn--sm" style="display:none;">🗑 Clear All</button>
+        </div>
+        <div id="bookmark-empty" class="pyq-state-box">
+          <div class="pyq-state-box__icon">🔖</div>
+          <h3 class="pyq-state-box__title">No Bookmarks Yet</h3>
+          <p class="pyq-state-box__msg">Click the 🔖 button on any paper card to save it here.</p>
+        </div>
+        <div id="bookmark-list" class="pyq-results hidden"></div>
+      </section>
+
+      <!-- ════ TO-DO ════ -->
+      <section id="section-todo" class="dash-section" data-section="todo">
+        <div class="dash-section__header">
+          <div>
+            <h2 class="dash-section__title">To-Do List</h2>
+            <p class="dash-section__subtitle">Track your tasks and study goals</p>
+          </div>
+        </div>
+        <div class="todo-container">
+          <div class="todo-add">
+            <input type="text" id="todo-input" class="form-input" placeholder="Add a new task..." />
+            <select id="todo-priority" class="form-select todo-priority-select">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+            <input type="date" id="todo-due" class="form-input todo-due-input" />
+            <button id="todo-add-btn" class="btn btn--primary">Add Task</button>
+          </div>
+          <div class="todo-filter-tabs">
+            <button class="todo-filter-tab todo-filter-tab--active" data-filter="all">All</button>
+            <button class="todo-filter-tab" data-filter="pending">Pending</button>
+            <button class="todo-filter-tab" data-filter="done">Done</button>
+            <button class="todo-filter-tab" data-filter="high">High Priority</button>
+          </div>
+          <ul id="todo-list" class="todo-list"></ul>
+        </div>
+      </section>
+
+      <!-- ════ MY RESULTS ════ -->
+      <section id="section-results" class="dash-section" data-section="results">
+        <div class="dash-section__header">
+          <div>
+            <h2 class="dash-section__title">My Results</h2>
+            <p class="dash-section__subtitle">Extract your marks directly from result PDFs uploaded by admin</p>
+          </div>
+        </div>
+
+        <!-- Extract My Result -->
+        <div class="result-extract-box">
+          <div class="result-extract-box__title">🎓 Find My Result</div>
+          <div class="result-extract-box__sub">Enter your Roll Number or Name — AI will extract your marks from the result PDF automatically</div>
+          <div class="result-extract-input-row">
+            <input type="text" id="result-roll-input" class="form-input" placeholder="Roll Number (e.g. 22CSEB042)" style="flex:1;min-width:200px;" />
+            <input type="text" id="result-name-input" class="form-input" placeholder="Or Student Name" style="flex:1;min-width:180px;" />
+            <select id="result-filter-branch" class="form-select" style="min-width:120px;">
+              <option value="">Any Branch</option>
+              <option value="CSE">CSE</option><option value="ECE">ECE</option>
+              <option value="ME">ME</option><option value="CE">CE</option>
+              <option value="IT">IT</option><option value="Electrical">Electrical</option>
+              <option value="IOT">IOT</option>
+            </select>
+            <select id="result-filter-sem" class="form-select" style="min-width:120px;">
+              <option value="">Any Sem</option>
+              <option value="1">Sem 1</option><option value="2">Sem 2</option>
+              <option value="3">Sem 3</option><option value="4">Sem 4</option>
+              <option value="5">Sem 5</option><option value="6">Sem 6</option>
+              <option value="7">Sem 7</option><option value="8">Sem 8</option>
+            </select>
+            <button id="btn-find-result" class="btn btn--primary">🔍 Find My Result</button>
+          </div>
+          <div id="result-extract-status" style="margin-top:12px;font-size:13px;color:#888;display:none;"></div>
+        </div>
+
+        <!-- Extracted Result Card -->
+        <div id="result-card-container" style="display:none;"></div>
+
+        <!-- Browse All Results -->
+        <div style="margin-top:28px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+            <h3 style="font-size:15px;font-weight:700;color:#fff;">📁 All Available Results</h3>
+            <button id="btn-load-results" class="btn btn--ghost btn--sm">↻ Load Results</button>
+          </div>
+          <div id="results-list-state" class="pyq-state-box">
+            <div class="pyq-state-box__icon">📊</div>
+            <h3 class="pyq-state-box__title">Click "Load Results" to browse</h3>
+            <p class="pyq-state-box__msg">View all result PDFs available in the system</p>
+          </div>
+          <div id="results-files-grid" class="result-files-grid" style="display:none;"></div>
+        </div>
+      </section>
+
+      <!-- ════ AI CHAT ════ -->
+      <section id="section-ai-chat" class="dash-section" data-section="ai-chat">
+        <div class="dash-section__header">
+          <div>
+            <h2 class="dash-section__title">⚡ NeuralAssist™</h2>
+            <p class="dash-section__subtitle">LangChain RetrievalQA · ChromaDB · Groq LLaMA 3.3 — auto-routes your query</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="ai-source-indicator" style="font-size:11px;color:#666;"></span>
+            <button id="btn-clear-chat" class="btn btn--ghost btn--sm">🗑 Clear</button>
+          </div>
+        </div>
+
+        <!-- Quick suggestion chips -->
+        <div class="ai-chat-suggestions">
+          <div class="ai-suggestion-chip" onclick="sendSuggestion(this)">📊 Check my result</div>
+          <div class="ai-suggestion-chip" onclick="sendSuggestion(this)">📋 Attendance policy kya hai?</div>
+          <div class="ai-suggestion-chip" onclick="sendSuggestion(this)">🎓 Scholarship ke liye kya chahiye?</div>
+          <div class="ai-suggestion-chip" onclick="sendSuggestion(this)">📅 Internship rules batao</div>
+          <div class="ai-suggestion-chip" onclick="sendSuggestion(this)">📢 Latest announcements</div>
+        </div>
+
+        <div class="ai-chat-container">
+          <div id="ai-chat-messages" class="ai-chat-messages">
+            <div class="chat-msg chat-msg--ai">
+              <span class="chat-msg__avatar">⬡</span>
+              <div class="chat-msg__bubble">
+                <strong>Namaste! Main NeuralAssist™ hun — NIT KKR ka LangChain RAG-powered assistant.</strong><br/><br/>
+                Main inn chezon mein help kar sakta hun:<br/>
+                📊 <strong>Results</strong> — Apna roll number batao, main marks extract kar dunga<br/>
+                📋 <strong>Policies</strong> — Attendance, internship, scholarship rules<br/>
+                📢 <strong>Announcements</strong> — Latest official notices<br/>
+                💬 <strong>General</strong> — Kuch bhi poochho!<br/><br/>
+                <em style="color:#888;font-size:12px;">Backed by RAG — answers from actual uploaded documents</em>
+              </div>
+            </div>
+          </div>
+          <div class="ai-chat-input-bar">
+            <input type="text" id="ai-chat-input" class="form-input" placeholder="Kuch bhi poochho... (e.g. 'mera result 22CSEB042' ya 'attendance policy 2024')" />
+            <button id="ai-chat-send-btn" class="btn btn--primary">Send ↑</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="ask-ai-config.js"></script>
+  <script src="database.js"></script>
+  <script>
+  /* ══════════════════════════════════════════════
+     SUBJECT DATABASE
+  ══════════════════════════════════════════════ */
+  const SUBJECTS = {
+    cse:{name:'Computer Science & Engineering',semesters:{1:['Physics','EVS','C++ Programming','Communication Skills','Financial Management','Engineering Practices','Mathematics I'],2:['Digital System Design','Mathematics II','Data Structures & Algorithms','Web Design','Python Programming','Economics','Business Communication'],3:['Computer Organisation & Architecture','Mathematics III','Java Programming','Design & Analysis of Algorithms','IoT','Software Engineering'],4:['DBMS','Operating Systems','Computer Networks','Scripting Languages','AI & Soft Computing','Discrete Mathematics'],5:['Compiler Design','Theory of Computation','Machine Learning','Mobile App Development','Information Security','Data Mining'],6:['Artificial Intelligence','Cloud Computing','Big Data Analytics','Distributed Systems','NLP','Software Testing'],7:['Deep Learning','Computer Vision','Blockchain','IoT Advanced','Project Work I','Technical Elective I'],8:['Research Project','Internship','Technical Elective II','Technical Elective III','Seminar','Professional Ethics']}},
+    ece:{name:'Electronics & Communication Engineering',semesters:{1:['Physics','Mathematics I','Basic Electrical Engineering','Engineering Drawing','Communication Skills','EVS','Workshop'],2:['Mathematics II','Electronic Devices & Circuits','Signals & Systems','Digital Electronics','C Programming','Engineering Mechanics'],3:['Mathematics III','Analog Circuits','Electromagnetics','Digital Signal Processing','Data Structures','Communication Systems I'],4:['Communication Systems II','Microprocessors','VLSI Design','Control Systems','Probability','PCB Design'],5:['Antenna & Wave Propagation','Optical Fiber Communication','Embedded Systems','RF Engineering','Digital Communication','DSP Lab'],6:['Wireless Communication','Image Processing','IoT','FPGA Design','Network Analysis','Elective I'],7:['5G Communication','ML for ECE','Satellite Communication','Robotics','Project I','Elective II'],8:['Research Project','Internship','Advanced VLSI','Elective III','Seminar','Professional Ethics']}},
+    me:{name:'Mechanical Engineering',semesters:{1:['Mathematics I','Physics','Engineering Drawing','Workshop Technology','Communication Skills','EVS','Basic Electrical Engineering'],2:['Mathematics II','Thermodynamics','Manufacturing Processes','Engineering Mechanics','Material Science','C Programming'],3:['Mathematics III','Fluid Mechanics','Machine Design I','Theory of Machines','Heat Transfer','Metrology'],4:['Machine Design II','Industrial Engineering','CAD/CAM','Dynamics of Machines','Refrigeration','Operations Research'],5:['FEA','Automobile Engineering','Mechatronics','Power Plant Engineering','Tool Design','Elective I'],6:['Robotics','Advanced Manufacturing','CFD','Tribology','NDT','Elective II'],7:['Project I','Industrial Training','Elective III','Elective IV','Seminar','Advanced CAD'],8:['Research Project','Internship','Elective V','Elective VI','Seminar','Professional Ethics']}},
+    ee:{name:'Electrical Engineering',semesters:{1:['Mathematics I','Physics','Basic Electronics','Engineering Drawing','Communication Skills','EVS','Workshop'],2:['Mathematics II','Circuit Theory','Electrical Machines I','C Programming','Engineering Mechanics','Electromagnetic Theory'],3:['Mathematics III','Electrical Machines II','Analog Electronics','Digital Electronics','Signals & Systems','Measurement & Instrumentation'],4:['Power Systems I','Control Systems','Microprocessors','Power Electronics','Numerical Methods','Electrical Drives'],5:['Power Systems II','High Voltage Engineering','Switchgear','Utilisation of Electrical Energy','DSP','Elective I'],6:['Renewable Energy','Smart Grid','HVDC','Industrial Automation','Power Quality','Elective II'],7:['Project I','Internship','Elective III','Elective IV','Advanced Power Systems','Seminar'],8:['Research Project','Internship','Elective V','Elective VI','Seminar','Professional Ethics']}},
+    ce:{name:'Civil Engineering',semesters:{1:['Mathematics I','Physics','Engineering Drawing','Building Materials','Communication Skills','EVS','Workshop'],2:['Mathematics II','Mechanics of Solids','Fluid Mechanics','Surveying I','C Programming','Engineering Geology'],3:['Mathematics III','Structural Analysis I','Concrete Technology','Soil Mechanics','Hydraulics','Surveying II'],4:['Structural Analysis II','Design of Concrete Structures','Geotechnical Engineering','Highway Engineering','Water Resources','Environmental Engineering I'],5:['Design of Steel Structures','Foundation Engineering','Transportation Engineering','Irrigation Engineering','Environmental Engineering II','Elective I'],6:['Prestressed Concrete','Construction Management','Remote Sensing','Bridge Engineering','Quantity Surveying','Elective II'],7:['Project I','Internship','Elective III','Elective IV','Advanced Foundation Engineering','Seminar'],8:['Research Project','Internship','Elective V','Elective VI','Seminar','Professional Ethics']}},
+    it:{name:'Information Technology',semesters:{1:['Mathematics I','Physics','C Programming','Communication Skills','EVS','Digital Electronics','Engineering Practices'],2:['Mathematics II','Data Structures','Web Technologies','Python Programming','Discrete Mathematics','Economics'],3:['Mathematics III','Java','Database Systems','Computer Networks','Software Engineering','Linux & Shell Scripting'],4:['Operating Systems','DAA','Web Frameworks','Cyber Security','Mobile Computing','Statistics'],5:['Machine Learning','Cloud Computing','Android Development','Data Mining','Information Security','Elective I'],6:['Artificial Intelligence','Big Data','DevOps','Blockchain','API Development','Elective II'],7:['Project I','Internship','Elective III','Deep Learning','Microservices','Seminar'],8:['Research Project','Internship','Elective IV','Elective V','Seminar','Professional Ethics']}},
+    che:{name:'Chemical Engineering',semesters:{1:['Mathematics I','Physics','Chemistry','Engineering Drawing','Communication Skills','EVS','Workshop'],2:['Mathematics II','Process Calculations','Fluid Mechanics','Thermodynamics I','C Programming','Engineering Mechanics'],3:['Mathematics III','Thermodynamics II','Heat Transfer','Mass Transfer I','CRE I','Organic Chemistry'],4:['Mass Transfer II','CRE II','Instrumentation & Control','Process Equipment Design','Petroleum Refining','Transport Phenomena'],5:['Process Dynamics','Chemical Plant Design','Polymer Technology','Biochemical Engineering','Environmental Engineering','Elective I'],6:['Petrochemicals','Safety & Hazard Analysis','Optimization','Nanotechnology','Industrial Processes','Elective II'],7:['Project I','Internship','Elective III','Elective IV','Advanced CRE','Seminar'],8:['Research Project','Internship','Elective V','Elective VI','Seminar','Professional Ethics']}},
+    mca:{name:'Master of Computer Applications',semesters:{1:['Discrete Mathematics','C & Data Structures','Computer Organisation','DBMS','Communication Skills','Software Engineering'],2:['DAA','Operating Systems','Computer Networks','Java','Web Technologies','Statistics'],3:['Machine Learning','Mobile App Development','Cloud Computing','Information Security','Software Testing','Elective I'],4:['Artificial Intelligence','Big Data Analytics','IoT','DevOps','Project Work','Elective II'],5:['Deep Learning','Blockchain','Research Methodology','Elective III','Elective IV','Seminar'],6:['Major Project','Internship','Elective V','Seminar','Professional Ethics','Viva Voce'],7:['N/A'],8:['N/A']}},
+    mba:{name:'Master of Business Administration',semesters:{1:['Management Concepts','Financial Accounting','Business Economics','Marketing Management','Organisational Behaviour','Business Statistics'],2:['Corporate Finance','HRM','Operations Management','Research Methodology','Business Law','Strategic Management'],3:['Project Management','Entrepreneurship','International Business','Elective I','Elective II','Business Ethics'],4:['Major Project','Internship','Elective III','Elective IV','Seminar','Viva Voce'],5:['N/A'],6:['N/A'],7:['N/A'],8:['N/A']}}
+  };
+
+  /* ══════════════════════════════════════════════
+     HELPERS
+  ══════════════════════════════════════════════ */
+  function esc(s){const d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
+  function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+  function timeAgo(iso){const d=Date.now()-new Date(iso).getTime(),m=Math.floor(d/60000);if(m<1)return'Just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
+
+  function showToast(msg){
+    let t=document.getElementById('global-toast');
+    if(!t){t=document.createElement('div');t.id='global-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--clr-primary);color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.5);z-index:9999;opacity:0;transition:all .25s;pointer-events:none;';document.body.appendChild(t);}
+    t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+    clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},2400);
+  }
+
+  /* ══════════════════════════════════════════════
+     SIDEBAR NAVIGATION
+  ══════════════════════════════════════════════ */
+  document.querySelectorAll('.sidebar__nav-item').forEach(item=>{
+    item.addEventListener('click',e=>{
+      e.preventDefault();
+      document.querySelectorAll('.sidebar__nav-item').forEach(i=>i.classList.remove('sidebar__nav-item--active'));
+      item.classList.add('sidebar__nav-item--active');
+      document.querySelectorAll('.dash-section').forEach(s=>s.classList.remove('dash-section--active'));
+      const sec=document.getElementById('section-'+item.dataset.section);
+      if(sec) sec.classList.add('dash-section--active');
+      document.getElementById('topbar-title').textContent=item.textContent.trim().replace(/^\S+\s*/,'').trim();
+      if(item.dataset.section==='bookmarks') renderBookmarks();
+      if(item.dataset.section==='notifications'){markAllNotifRead();renderNotifications();}
+      if(item.dataset.section==='assignments'){renderAsgnList();updateAsgnBadge();}
+      if(item.dataset.section==='resources') renderResources();
+      if(item.dataset.section==='announcements') renderAnnouncements();
+      if(window.innerWidth<=768) document.getElementById('sidebar').classList.remove('is-open');
+    });
+  });
+  document.getElementById('sidebar-toggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('is-open'));
+  document.addEventListener('click',e=>{
+    const sb=document.getElementById('sidebar'),tog=document.getElementById('sidebar-toggle');
+    if(sb.classList.contains('is-open')&&!sb.contains(e.target)&&!tog.contains(e.target)) sb.classList.remove('is-open');
+  });
+
+  /* ══════════════════════════════════════════════
+     PYQ FILTER LOGIC
+  ══════════════════════════════════════════════ */
+  const branchSel=document.getElementById('filter-branch');
+  const semSel=document.getElementById('filter-semester');
+  const subjectSel=document.getElementById('filter-subject');
+  const examSel=document.getElementById('filter-exam');
+  const yearSel=document.getElementById('filter-year');
+  const searchInp=document.getElementById('pyq-search-input');
+  const chipsEl=document.getElementById('filter-chips');
+
+  function showState(which){
+    ['state-default','state-coming-soon','state-no-results','pyq-results-grid'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+    document.getElementById({default:'state-default','coming-soon':'state-coming-soon','no-results':'state-no-results',results:'pyq-results-grid'}[which])?.classList.remove('hidden');
+  }
+
+  branchSel.addEventListener('change',()=>{
+    const b=branchSel.value;
+    semSel.innerHTML='<option value="">Select Semester</option>';
+    subjectSel.innerHTML='<option value="">Select Subject</option>';
+    semSel.disabled=subjectSel.disabled=true;
+    if(!b){showState('default');updateChips();return;}
+    Object.keys(SUBJECTS[b]?.semesters||{}).forEach(s=>{
+      const o=document.createElement('option');o.value=s;o.textContent='Semester '+s;semSel.appendChild(o);
+    });
+    semSel.disabled=false;
+    runQuery();updateChips();
+  });
+  semSel.addEventListener('change',()=>{
+    const b=branchSel.value,s=semSel.value;
+    subjectSel.innerHTML='<option value="">Select Subject</option>';
+    subjectSel.disabled=true;
+    if(b&&s){
+      (SUBJECTS[b]?.semesters[s]||[]).forEach(sub=>{const o=document.createElement('option');o.value=sub;o.textContent=sub;subjectSel.appendChild(o);});
+      subjectSel.disabled=false;
+    }
+    runQuery();updateChips();
+  });
+  subjectSel.addEventListener('change',()=>{runQuery();updateChips();});
+  examSel.addEventListener('change',()=>{runQuery();updateChips();});
+  yearSel.addEventListener('change',()=>{runQuery();updateChips();});
+  searchInp.addEventListener('input',()=>{runQuery();updateChips();});
+  document.getElementById('pyq-search-btn').addEventListener('click',()=>{runQuery();updateChips();DB.Analytics.logSearch(searchInp.value.trim(),branchSel.value);});
+  document.getElementById('btn-clear-filters').addEventListener('click',()=>{
+    branchSel.value='';semSel.innerHTML='<option value="">Select Semester</option>';
+    subjectSel.innerHTML='<option value="">Select Subject</option>';
+    semSel.disabled=subjectSel.disabled=true;
+    examSel.value='';yearSel.value='';searchInp.value='';
+    showState('default');updateChips();
+  });
+
+  function updateChips(){
+    const chips=[];
+    if(branchSel.value) chips.push(SUBJECTS[branchSel.value]?.name||branchSel.value);
+    if(semSel.value) chips.push('Semester '+semSel.value);
+    if(subjectSel.value) chips.push(subjectSel.value);
+    if(examSel.value) chips.push(examSel.value==='mid'?'Mid Sem':'End Sem');
+    if(yearSel.value) chips.push(yearSel.value);
+    if(searchInp.value.trim()) chips.push('"'+searchInp.value.trim()+'"');
+    chipsEl.innerHTML=chips.map(c=>`<span class="filter-chip">${esc(c)}</span>`).join('');
+  }
+
+  function runQuery(){
+    if(!branchSel.value&&!searchInp.value.trim()){showState('default');return;}
+    const results=DB.PYQ.query({
+      branch:branchSel.value,semester:semSel.value,
+      subject:subjectSel.value,examType:examSel.value,
+      year:yearSel.value,search:searchInp.value.trim()
+    });
+    if(results.length===0){
+      if(branchSel.value&&!semSel.value&&!searchInp.value.trim()){
+        document.getElementById('coming-soon-msg').textContent=`No papers yet for ${SUBJECTS[branchSel.value]?.name||branchSel.value}. Check back soon!`;
+        showState('coming-soon');
+      } else showState('no-results');
+      return;
+    }
+    renderPYQCards(results);
+    showState('results');
+  }
+
+  /* ══ BOOKMARKS ══ */
+  function getBookmarks(){try{return JSON.parse(localStorage.getItem('nitkkr_bookmarks')||'[]');}catch{return[];}}
+  function saveBookmarks(arr){localStorage.setItem('nitkkr_bookmarks',JSON.stringify(arr));}
+  function isBookmarked(id){return getBookmarks().includes(id);}
+  function toggleBookmark(id){
+    let bm=getBookmarks();
+    if(bm.includes(id)){bm=bm.filter(x=>x!==id);showToast('Bookmark removed');}
+    else{bm.push(id);showToast('🔖 Bookmarked!');}
+    saveBookmarks(bm);return bm.includes(id);
+  }
+
+  function renderPYQCards(papers){
+    const grid=document.getElementById('pyq-results-grid');
+    grid.innerHTML='';
+    papers.forEach(paper=>{
+      const bm=isBookmarked(paper.id);
+      const card=document.createElement('div');
+      card.className='pyq-card';
+      card.innerHTML=`
+        <div class="pyq-card__header">
+          <div class="pyq-card__tags">
+            <span class="pyq-card__tag pyq-card__tag--branch">${esc(paper.branch.toUpperCase())}</span>
+            <span class="pyq-card__tag pyq-card__tag--sem">Sem ${esc(paper.semester)}</span>
+            <span class="pyq-card__tag pyq-card__tag--exam">${esc(paper.examTypeLabel||paper.examType)}</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="pyq-card__year">${esc(paper.year)}</span>
+            <button class="btn btn--ghost btn--xs bm-btn" data-id="${esc(paper.id)}" title="Bookmark">${bm?'🔖':'☆'}</button>
+          </div>
+        </div>
+        <h4 class="pyq-card__title">${esc(paper.title)}</h4>
+        <p class="pyq-card__meta">${esc(paper.branchName)} • ${esc(paper.subject)}</p>
+        <div class="pyq-card__questions">
+          ${paper.questions&&paper.questions.length>0
+            ?paper.questions.map((q,idx)=>`
+              <div class="pyq-qrow">
+                <div class="pyq-qrow__content">
+                  <span class="pyq-qrow__num">${esc(q.number)}</span>
+                  <span class="pyq-qrow__text">${esc(q.text.length>130?q.text.slice(0,130)+'…':q.text)}</span>
+                </div>
+                <div class="pyq-qrow__actions">
+                  ${q.marks?`<span class="pyq-qrow__marks">${q.marks}M</span>`:''}
+                  <button class="btn btn--primary btn--xs ask-ai-btn" data-paper-id="${esc(paper.id)}" data-q-idx="${idx}">🤖 Ask AI</button>
+                </div>
+              </div>`).join('')
+            :'<div class="pyq-no-questions">📄 View PDF to see questions</div>'}
+        </div>
+        <div class="pyq-card__footer">
+          ${paper.fileData?`<button class="btn btn--primary btn--sm view-pdf-btn" data-id="${esc(paper.id)}">📄 View PDF</button>`:'<span style="font-size:12px;color:#666;">PDF not attached</span>'}
+          <span style="font-size:11px;color:#555;">Uploaded: ${esc(paper.uploadedAt||'')}</span>
+        </div>`;
+      card.querySelector('.bm-btn').addEventListener('click',function(){
+        const isBm=toggleBookmark(this.dataset.id);
+        this.textContent=isBm?'🔖':'☆';
+      });
+      card.querySelectorAll('.ask-ai-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>openAskAI(paper,parseInt(btn.dataset.qIdx)));
+      });
+      card.querySelector('.view-pdf-btn')?.addEventListener('click',()=>openPDF(paper.id));
+      grid.appendChild(card);
+    });
+  }
+
+  function openPDF(id){
+    const paper=DB.PYQ.getById(id);
+    if(!paper?.fileData){showToast('PDF not available');return;}
+    try{
+      const b=atob(paper.fileData);const arr=new Uint8Array(b.length);
+      for(let i=0;i<b.length;i++)arr[i]=b.charCodeAt(i);
+      window.open(URL.createObjectURL(new Blob([arr],{type:'application/pdf'})),'_blank');
+    }catch{showToast('Could not open PDF');}
+  }
+
+  /* ══ BOOKMARKS SECTION ══ */
+  function renderBookmarks(){
+    const ids=getBookmarks();
+    const emptyEl=document.getElementById('bookmark-empty');
+    const listEl=document.getElementById('bookmark-list');
+    const clearBtn=document.getElementById('btn-clear-bookmarks');
+    if(!ids.length){emptyEl.classList.remove('hidden');listEl.classList.add('hidden');clearBtn.style.display='none';listEl.innerHTML='';return;}
+    const papers=ids.map(id=>DB.PYQ.getById(id)).filter(Boolean);
+    if(!papers.length){emptyEl.classList.remove('hidden');listEl.classList.add('hidden');clearBtn.style.display='none';return;}
+    emptyEl.classList.add('hidden');listEl.classList.remove('hidden');clearBtn.style.display='';
+    listEl.innerHTML='';
+    papers.forEach(paper=>{
+      const card=document.createElement('div');card.className='pyq-card';
+      card.innerHTML=`
+        <div class="pyq-card__header">
+          <div class="pyq-card__tags">
+            <span class="pyq-card__tag pyq-card__tag--branch">${esc(paper.branch.toUpperCase())}</span>
+            <span class="pyq-card__tag pyq-card__tag--sem">Sem ${esc(paper.semester)}</span>
+            <span class="pyq-card__tag pyq-card__tag--exam">${esc(paper.examTypeLabel)}</span>
+          </div>
+          <span class="pyq-card__year">${esc(paper.year)}</span>
+        </div>
+        <h4 class="pyq-card__title">${esc(paper.title)}</h4>
+        <p class="pyq-card__meta">${esc(paper.branchName)} • ${esc(paper.subject)}</p>
+        <div class="pyq-card__footer">
+          <button class="btn btn--danger btn--sm rm-bm-btn" data-id="${esc(paper.id)}">🗑 Remove</button>
+          ${paper.fileData?`<button class="btn btn--primary btn--sm view-pdf-btn" data-id="${esc(paper.id)}">📄 View PDF</button>`:''}
+        </div>`;
+      card.querySelector('.rm-bm-btn').addEventListener('click',()=>{toggleBookmark(paper.id);renderBookmarks();});
+      card.querySelector('.view-pdf-btn')?.addEventListener('click',()=>openPDF(paper.id));
+      listEl.appendChild(card);
+    });
+  }
+  document.getElementById('btn-clear-bookmarks').addEventListener('click',()=>{
+    if(confirm('Remove all bookmarks?')){saveBookmarks([]);renderBookmarks();}
+  });
+
+  /* ══════════════════════════════════════════════
+     STUDY RESOURCES
+  ══════════════════════════════════════════════ */
+  let activeResTab='notes';
+
+  document.querySelectorAll('.resource-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.resource-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      activeResTab=tab.dataset.rtab;
+      document.querySelectorAll('.res-panel').forEach(p=>p.classList.add('hidden'));
+      document.getElementById('res-'+activeResTab)?.classList.remove('hidden');
+    });
+  });
+
+  document.getElementById('res-filter-btn').addEventListener('click',renderResources);
+  document.getElementById('res-clear-btn').addEventListener('click',()=>{
+    document.getElementById('res-filter-branch').value='';
+    document.getElementById('res-filter-sem').value='';
+    renderResources();
+  });
+
+  function renderResources(){
+    const branch=document.getElementById('res-filter-branch').value;
+    const sem=document.getElementById('res-filter-sem').value;
+    renderNotes(branch,sem);
+    renderLabManuals(branch,sem);
+  }
+
+  function renderNotes(branch,sem){
+    const notes=DB.Notes.query({branch,semester:sem});
+    const listEl=document.getElementById('notes-list');
+    const emptyEl=document.getElementById('notes-empty');
+    if(!notes.length){emptyEl.classList.remove('hidden');listEl.innerHTML='';return;}
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML=notes.map(n=>`
+      <div class="material-card">
+        <div class="material-card__title">📒 ${esc(n.title)}</div>
+        <div class="material-card__meta">
+          <span class="pyq-card__tag pyq-card__tag--branch" style="font-size:10px;padding:2px 7px;">${esc(n.branch.toUpperCase())}</span>
+          &nbsp;Sem ${esc(n.semester)} &nbsp;•&nbsp; ${esc(n.subject)}
+          ${n.unit?` &nbsp;•&nbsp; <span class="tag-unit">Unit ${esc(n.unit)}</span>`:''}
+          &nbsp;•&nbsp; By ${esc(n.uploadedBy||'Teacher')} &nbsp;•&nbsp; ${esc(n.uploadedAt||'')}
+        </div>
+        ${n.description?`<p style="font-size:13px;color:#aaa;margin-bottom:12px;">${esc(n.description)}</p>`:''}
+        <div class="material-card__actions">
+          ${n.fileData?`<button class="btn btn--primary btn--sm" onclick="openFile('${esc(n.id)}','note')">📥 Download / View</button>`:'<span style="font-size:12px;color:#666;">No file attached</span>'}
+        </div>
+      </div>`).join('');
+  }
+
+  function renderLabManuals(branch,sem){
+    const labs=DB.LabManuals.query({branch,semester:sem});
+    const listEl=document.getElementById('lab-list');
+    const emptyEl=document.getElementById('lab-empty');
+    if(!labs.length){emptyEl.classList.remove('hidden');listEl.innerHTML='';return;}
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML=labs.map(l=>`
+      <div class="material-card">
+        <div class="material-card__title">🔬 ${esc(l.title)}</div>
+        <div class="material-card__meta">
+          <span class="pyq-card__tag pyq-card__tag--branch" style="font-size:10px;padding:2px 7px;">${esc(l.branch.toUpperCase())}</span>
+          &nbsp;Sem ${esc(l.semester)} &nbsp;•&nbsp; ${esc(l.subject)}
+          ${l.labCount?` &nbsp;•&nbsp; <span class="tag-lab">${esc(String(l.labCount))} Labs</span>`:''}
+          &nbsp;•&nbsp; By ${esc(l.uploadedBy||'Teacher')} &nbsp;•&nbsp; ${esc(l.uploadedAt||'')}
+        </div>
+        ${l.description?`<p style="font-size:13px;color:#aaa;margin-bottom:12px;">${esc(l.description)}</p>`:''}
+        <div class="material-card__actions">
+          ${l.fileData?`<button class="btn btn--primary btn--sm" onclick="openFile('${esc(l.id)}','lab')">📥 Download / View</button>`:'<span style="font-size:12px;color:#666;">No file attached</span>'}
+        </div>
+      </div>`).join('');
+  }
+
+  function openFile(id,type){
+    let item;
+    if(type==='note') item=DB.Notes.getById(id);
+    else if(type==='lab') item=DB.LabManuals.getById(id);
+    if(!item?.fileData){showToast('File not available');return;}
+    try{
+      const b=atob(item.fileData);const arr=new Uint8Array(b.length);
+      for(let i=0;i<b.length;i++)arr[i]=b.charCodeAt(i);
+      window.open(URL.createObjectURL(new Blob([arr],{type:'application/pdf'})),'_blank');
+    }catch{showToast('Could not open file');}
+  }
+  window.openFile=openFile;
+
+  /* ══════════════════════════════════════════════
+     ASSIGNMENTS
+  ══════════════════════════════════════════════ */
+  function daysLeft(dueStr){
+    if(!dueStr) return{label:'No due date',cls:'status--active',urgent:false};
+    const due=new Date(dueStr);const now=new Date();now.setHours(0,0,0,0);
+    const diff=Math.round((due-now)/86400000);
+    if(diff<0) return{label:'Overdue',cls:'status--overdue',urgent:true};
+    if(diff===0) return{label:'Due Today',cls:'status--today',urgent:true};
+    if(diff<=3) return{label:diff+'d left',cls:'status--soon',urgent:true};
+    return{label:diff+'d left',cls:'status--active',urgent:false};
+  }
+
+  function updateAsgnBadge(){
+    const all=DB.Assignments.getAll();
+    const urgent=all.filter(a=>{const d=Math.round((new Date(a.dueDate)-new Date())/86400000);return d>=0&&d<=3;}).length;
+    const badge=document.getElementById('asgn-badge');
+    if(urgent>0){badge.textContent=urgent;badge.style.display='';}else badge.style.display='none';
+  }
+
+  function renderAsgnList(){
+    const branch=document.getElementById('asgn-filter-branch').value;
+    const sem=document.getElementById('asgn-filter-sem').value;
+    let all=DB.Assignments.query({branch,semester:sem});
+    all.sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate));
+    const listEl=document.getElementById('asgn-list');
+    const emptyEl=document.getElementById('asgn-empty');
+    if(!all.length){emptyEl.classList.remove('hidden');listEl.classList.add('hidden');listEl.innerHTML='';return;}
+    emptyEl.classList.add('hidden');listEl.classList.remove('hidden');
+    listEl.innerHTML=all.map(a=>{
+      const dl=daysLeft(a.dueDate);
+      const due=a.dueDate?new Date(a.dueDate).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}):'No due date';
+      return `<div class="assignment-card" onclick="openAsgnModal('${esc(a.id)}')">
+        <div class="assignment-card__header">
+          <h4 class="assignment-card__title">${esc(a.title)}</h4>
+          <span class="${dl.cls}">${dl.label}</span>
+        </div>
+        <p class="assignment-card__meta">
+          <span class="pyq-card__tag pyq-card__tag--branch" style="font-size:10px;padding:2px 7px;">${esc(a.branch.toUpperCase())}</span>
+          &nbsp;Sem ${esc(a.semester)} &nbsp;•&nbsp; ${esc(a.subject)}
+          ${a.maxMarks?' &nbsp;•&nbsp; '+esc(String(a.maxMarks))+' marks':''}
+        </p>
+        <p class="assignment-card__meta" style="margin-top:6px;">📅 <strong>Due: ${esc(due)}</strong> ${a.attachmentData?'&nbsp;•&nbsp; 📎 Attachment available':''}</p>
+        ${a.description?`<p class="assignment-card__desc">${esc(a.description.length>120?a.description.slice(0,120)+'…':a.description)}</p>`:''}
+      </div>`;
+    }).join('');
+  }
+
+  window.openAsgnModal=function(id){
+    const a=DB.Assignments.getById(id);if(!a)return;
+    const dl=daysLeft(a.dueDate);
+    const due=a.dueDate?new Date(a.dueDate).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'No due date';
+    document.getElementById('asgn-modal-tags').innerHTML=`
+      <span class="pyq-card__tag pyq-card__tag--branch">${esc(a.branch.toUpperCase())}</span>
+      <span class="pyq-card__tag pyq-card__tag--sem">Sem ${esc(a.semester)}</span>
+      <span class="pyq-card__tag">${esc(a.subject)}</span>
+      ${a.maxMarks?`<span class="pyq-card__tag">${esc(String(a.maxMarks))} Marks`:''}`;
+    document.getElementById('asgn-modal-title').textContent=a.title;
+    document.getElementById('asgn-modal-meta').textContent=(a.branchName||a.branch.toUpperCase())+' • Posted by: '+(a.createdByName||'Teacher')+' • '+new Date(a.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    const banner=document.getElementById('asgn-modal-due-banner');
+    banner.className=`asgn-modal__due-banner ${dl.urgent?'due-urgent':'due-normal'}`;
+    banner.innerHTML=`📅 <strong>Due: ${esc(due)}</strong> — <span class="${dl.cls}">${dl.label}</span>`;
+    const descEl=document.getElementById('asgn-modal-desc');
+    if(a.description){descEl.textContent=a.description;descEl.classList.remove('hidden');}else descEl.classList.add('hidden');
+    const attachWrap=document.getElementById('asgn-modal-attachment');
+    const attachContent=document.getElementById('asgn-modal-attach-content');
+    if(a.attachmentData&&a.attachmentType){
+      attachWrap.classList.remove('hidden');
+      if(a.attachmentType.startsWith('image/')){
+        attachContent.innerHTML=`<img src="data:${esc(a.attachmentType)};base64,${a.attachmentData}" style="max-width:100%;border-radius:10px;margin-top:10px;" alt="Attachment" />`;
+      } else if(a.attachmentType==='application/pdf'){
+        attachContent.innerHTML=`<button class="btn btn--primary btn--sm" style="margin-top:10px;" onclick="openAsgnAttachment('${esc(id)}')">📄 Open PDF — ${esc(a.attachmentName||'attachment.pdf')}</button>`;
+      }
+    } else attachWrap.classList.add('hidden');
+    document.getElementById('asgn-modal-overlay').classList.remove('hidden');
+    document.body.style.overflow='hidden';
+  };
+
+  window.openAsgnAttachment=function(id){
+    const a=DB.Assignments.getById(id);
+    if(!a?.attachmentData)return;
+    try{const b=atob(a.attachmentData);const arr=new Uint8Array(b.length);for(let i=0;i<b.length;i++)arr[i]=b.charCodeAt(i);window.open(URL.createObjectURL(new Blob([arr],{type:a.attachmentType||'application/pdf'})),'_blank');}catch{showToast('Could not open attachment');}
+  };
+
+  document.getElementById('asgn-modal-close').addEventListener('click',()=>{document.getElementById('asgn-modal-overlay').classList.add('hidden');document.body.style.overflow='';});
+  document.getElementById('asgn-modal-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('asgn-modal-overlay')){document.getElementById('asgn-modal-overlay').classList.add('hidden');document.body.style.overflow='';}});
+  document.getElementById('asgn-filter-branch').addEventListener('change',renderAsgnList);
+  document.getElementById('asgn-filter-sem').addEventListener('change',renderAsgnList);
+
+  /* ══════════════════════════════════════════════
+     NOTIFICATIONS
+  ══════════════════════════════════════════════ */
+  function updateNotifBadge(){
+    const unread=DB.Notifications.getUnread().length;
+    const badge=document.getElementById('notif-badge');
+    if(unread>0){badge.textContent=unread>9?'9+':unread;badge.style.display='';}else badge.style.display='none';
+  }
+  function markAllNotifRead(){DB.Notifications.markAllRead();updateNotifBadge();}
+  function renderNotifications(){
+    const notifs=DB.Notifications.getAll();
+    const listEl=document.getElementById('notifications-list');
+    const emptyEl=document.getElementById('notif-empty');
+    if(!notifs.length){emptyEl.classList.remove('hidden');listEl.innerHTML='';return;}
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML=notifs.map(n=>`
+      <div class="notif-item ${n.read?'':'notif-item--unread'}">
+        <span class="notif-item__icon">${n.icon||'📄'}</span>
+        <div class="notif-item__info">
+          <p class="notif-item__text">${esc(n.text)}</p>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+            <span class="notif-item__time">${timeAgo(n.time)}</span>
+            ${n.paperId?`<button class="btn btn--primary btn--xs" onclick="openPDF('${esc(n.paperId)}')">View Paper →</button>`:''}
+          </div>
+        </div>
+        <button class="notif-dismiss" onclick="dismissNotif('${esc(n.id)}')">✕</button>
+      </div>`).join('');
+  }
+  window.dismissNotif=function(id){DB.Notifications.remove(id);renderNotifications();updateNotifBadge();};
+  document.getElementById('btn-mark-all-read').addEventListener('click',()=>{markAllNotifRead();renderNotifications();});
+
+  /* ══════════════════════════════════════════════
+     ANNOUNCEMENTS
+  ══════════════════════════════════════════════ */
+  function renderAnnouncements(){
+    const anns=DB.Announcements.getActive();
+    const listEl=document.getElementById('ann-list');
+    const emptyEl=document.getElementById('ann-empty');
+    if(!anns.length){emptyEl.classList.remove('hidden');listEl.classList.add('hidden');listEl.innerHTML='';return;}
+    emptyEl.classList.add('hidden');listEl.classList.remove('hidden');
+    listEl.innerHTML=anns.map(a=>`
+      <div class="ann-card ann-type--${esc(a.type)}">
+        <div class="ann-card__title">${a.type==='urgent'?'🚨 ':'📢 '}${esc(a.title)}</div>
+        ${a.body?`<div class="ann-card__body">${esc(a.body)}</div>`:''}
+        <div class="ann-card__meta">Posted by ${esc(a.postedBy||'Admin')} • ${timeAgo(a.createdAt)}${a.branch&&a.branch!=='all'?' • For '+esc(a.branch.toUpperCase()):''}</div>
+      </div>`).join('');
+  }
+
+  /* ══════════════════════════════════════════════
+     TO-DO
+  ══════════════════════════════════════════════ */
+  const TODO_KEY='nitkkr_student_todos';
+  function getTodos(){try{return JSON.parse(localStorage.getItem(TODO_KEY)||'[]');}catch{return[];}}
+  function saveTodos(arr){localStorage.setItem(TODO_KEY,JSON.stringify(arr));}
+
+  function renderTodos(){
+    const todos=getTodos();
+    const listEl=document.getElementById('todo-list');
+    listEl.innerHTML=todos.map(t=>`
+      <li class="todo-item todo-item--${esc(t.priority)} ${t.done?'todo-item--done':''}" data-id="${esc(t.id)}">
+        <input type="checkbox" class="todo-item__check" ${t.done?'checked':''} />
+        <div class="todo-item__info">
+          <span class="todo-item__text">${esc(t.text)}</span>
+          <span class="todo-item__meta">${t.due?'Due: '+t.due+' • ':''}${cap(t.priority)} Priority</span>
+        </div>
+        <span class="todo-item__priority todo-item__priority--${esc(t.priority)}">${cap(t.priority)}</span>
+        <button class="todo-item__delete btn btn--ghost btn--sm" data-id="${esc(t.id)}">🗑</button>
+      </li>`).join('');
+    listEl.querySelectorAll('.todo-item__check').forEach(chk=>{
+      chk.addEventListener('change',()=>{
+        const id=chk.closest('.todo-item').dataset.id;
+        const todos=getTodos();const i=todos.findIndex(t=>t.id===id);
+        if(i>=0){todos[i].done=chk.checked;saveTodos(todos);}
+        renderTodos();applyTodoFilter();
+      });
+    });
+    listEl.querySelectorAll('.todo-item__delete').forEach(btn=>{
+      btn.addEventListener('click',()=>{saveTodos(getTodos().filter(t=>t.id!==btn.dataset.id));renderTodos();applyTodoFilter();});
+    });
+    applyTodoFilter();
+  }
+
+  function applyTodoFilter(){
+    const f=document.querySelector('.todo-filter-tab--active')?.dataset.filter||'all';
+    document.querySelectorAll('.todo-item').forEach(item=>{
+      item.style.display=f==='all'?'':f==='done'?(item.classList.contains('todo-item--done')?'':'none'):f==='pending'?(!item.classList.contains('todo-item--done')?'':'none'):f==='high'?(item.classList.contains('todo-item--high')&&!item.classList.contains('todo-item--done')?'':'none'):'';
+    });
+  }
+
+  document.getElementById('todo-add-btn').addEventListener('click',()=>{
+    const text=document.getElementById('todo-input').value.trim();if(!text)return;
+    const todos=getTodos();
+    todos.unshift({id:'todo_'+Date.now(),text,priority:document.getElementById('todo-priority').value,due:document.getElementById('todo-due').value,done:false});
+    saveTodos(todos);
+    document.getElementById('todo-input').value='';document.getElementById('todo-due').value='';
+    renderTodos();
+  });
+  document.getElementById('todo-input').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('todo-add-btn').click();});
+  document.querySelectorAll('.todo-filter-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{document.querySelectorAll('.todo-filter-tab').forEach(t=>t.classList.remove('todo-filter-tab--active'));tab.classList.add('todo-filter-tab--active');applyTodoFilter();});
+  });
+  renderTodos();
+
+  /* ══════════════════════════════════════════════
+     ASK AI MODAL
+  ══════════════════════════════════════════════ */
+  let _curPaper=null,_curQ=null;
+  function openAskAI(paper,qIdx){
+    _curPaper=paper;_curQ=paper.questions[qIdx];
+    document.getElementById('ask-ai-subtitle').textContent=paper.subject+' • '+paper.branchName;
+    document.getElementById('ask-ai-q-badge').textContent=_curQ.number;
+    document.getElementById('ask-ai-q-meta').textContent=paper.subject+' • '+paper.branch.toUpperCase()+' Sem '+paper.semester+' • '+paper.year+' '+paper.examTypeLabel;
+    document.getElementById('ask-ai-q-text').textContent=_curQ.text;
+    document.getElementById('ask-ai-chat').innerHTML=`<div class="chat-msg chat-msg--ai"><span class="chat-msg__avatar">⬡</span><div class="chat-msg__bubble">Hi! I have <strong>${esc(_curQ.number)}</strong> loaded above. What's your doubt? I'll explain step by step.</div></div>`;
+    document.getElementById('ask-ai-overlay').classList.remove('hidden');
+    document.body.style.overflow='hidden';
+    document.getElementById('ask-ai-input').focus();
+  }
+  document.getElementById('ask-ai-close').addEventListener('click',()=>{document.getElementById('ask-ai-overlay').classList.add('hidden');document.body.style.overflow='';});
+  document.getElementById('ask-ai-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('ask-ai-overlay')){document.getElementById('ask-ai-overlay').classList.add('hidden');document.body.style.overflow='';}});
+  document.getElementById('ask-ai-send').addEventListener('click',sendAskAI);
+  document.getElementById('ask-ai-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendAskAI();});
+
+  async function sendAskAI(){
+    const doubt=document.getElementById('ask-ai-input').value.trim();
+    if(!doubt||!_curQ)return;
+    appendAIMsg('user',doubt);
+    document.getElementById('ask-ai-input').value='';
+    document.getElementById('ask-ai-input').disabled=true;
+    document.getElementById('ask-ai-send').disabled=true;
+    const thinkDiv=appendAIMsg('ai','⬡ Thinking…');
+    try{
+      let aiText='';
+      const cfg=typeof AskAIConfig!=='undefined'?AskAIConfig:{};
+      const mode=cfg.MODE||'groq';
+      const sys=`You are an expert NIT Kurukshetra academic tutor. The student is studying ${_curPaper.subject} (${_curPaper.branchName}, Semester ${_curPaper.semester}, ${_curPaper.year}).\n\nExam question:\n${_curQ.number}: ${_curQ.text}${_curQ.marks?' ['+_curQ.marks+' marks]':''}\n\nExplain clearly, step by step. Use examples and code snippets where helpful. Be encouraging.`;
+      if(mode==='groq'){
+        const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.GROQ_API_KEY},body:JSON.stringify({model:cfg.GROQ_MODEL||'llama-3.3-70b-versatile',max_tokens:1024,temperature:0.7,messages:[{role:'system',content:sys},{role:'user',content:doubt}]})});
+        if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||'Groq API error '+r.status);}
+        aiText=(await r.json())?.choices?.[0]?.message?.content||'No response.';
+      } else if(mode==='rag'){
+        const r=await fetch(cfg.RAG_BACKEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question_context:_curQ.number+': '+_curQ.text,student_doubt:doubt,subject:_curPaper.subject,branch:_curPaper.branch,semester:String(_curPaper.semester),year:String(_curPaper.year)})});
+        const d=await r.json();aiText=d.answer||'No answer.';
+      } else {
+        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:doubt}]})});
+        aiText=(await r.json())?.content?.[0]?.text||'No response.';
+      }
+      thinkDiv.querySelector('.chat-msg__bubble').innerHTML=fmtAI(aiText);
+    }catch(err){
+      let msg='❌ '+err.message;
+      if(err.message.includes('API_KEY')||err.message.includes('api_key'))msg='🔑 Groq API key missing! Set GROQ_API_KEY in ask-ai-config.js. Sign up free at groq.com';
+      else if(err.message.includes('401'))msg='🔑 Invalid API key. Check groq.com';
+      else if(err.message.includes('429'))msg='⏳ Rate limit hit. Please wait a moment and try again.';
+      thinkDiv.querySelector('.chat-msg__bubble').textContent=msg;
+    }
+    document.getElementById('ask-ai-input').disabled=false;
+    document.getElementById('ask-ai-send').disabled=false;
+    document.getElementById('ask-ai-input').focus();
+  }
+
+  function appendAIMsg(role,text){
+    const div=document.createElement('div');div.className='chat-msg chat-msg--'+role;
+    div.innerHTML=`<span class="chat-msg__avatar">${role==='ai'?'⬡':'👤'}</span><div class="chat-msg__bubble">${esc(text)}</div>`;
+    const chat=document.getElementById('ask-ai-chat');chat.appendChild(div);chat.scrollTop=chat.scrollHeight;return div;
+  }
+  function fmtAI(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code style="background:rgba(108,99,255,0.15);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px">$1</code>').replace(/\n/g,'<br/>');}
+
+  /* ══════════════════════════════════════════════
+     AI GENERAL CHAT — RAG Backend
+  ══════════════════════════════════════════════ */
+  document.getElementById('ai-chat-send-btn').addEventListener('click', genChat);
+  document.getElementById('ai-chat-input').addEventListener('keydown', e => { if (e.key === 'Enter') genChat(); });
+  document.getElementById('btn-clear-chat').addEventListener('click', () => {
+    document.getElementById('ai-chat-messages').innerHTML = `
+      <div class="chat-msg chat-msg--ai">
+        <span class="chat-msg__avatar">⬡</span>
+        <div class="chat-msg__bubble"><strong>Chat cleared!</strong> Kya poochna hai?</div>
+      </div>`;
+  });
+
+  // Suggestion chips
+  window.sendSuggestion = function(el) {
+    const txt = el.textContent.replace(/^[^\s]+\s/, '').trim();
+    document.getElementById('ai-chat-input').value = txt;
+    genChat();
+  };
+
+  async function genChat() {
+    const inp = document.getElementById('ai-chat-input');
+    const text = inp.value.trim();
+    if (!text) return;
+
+    const msgs = document.getElementById('ai-chat-messages');
+    msgs.insertAdjacentHTML('beforeend', `<div class="chat-msg chat-msg--user"><span class="chat-msg__avatar">👤</span><div class="chat-msg__bubble">${esc(text)}</div></div>`);
+    inp.value = '';
+
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'chat-msg chat-msg--ai';
+    aiDiv.innerHTML = `<span class="chat-msg__avatar">⬡</span><div class="chat-msg__bubble"><span style="color:#666;font-style:italic;">Searching documents…</span></div>`;
+    msgs.appendChild(aiDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    try {
+      const res = await API.chat(text);
+      const answer = res.answer || 'No response received.';
+      const sourceType = res.source_type || 'general';
+      const sourceBadgeMap = {
+        result: '<span class="chat-source-badge chat-source-badge--result">📊 Result DB</span>',
+        notification: '<span class="chat-source-badge chat-source-badge--notification">📋 Policy Docs</span>',
+        announcement: '<span class="chat-source-badge chat-source-badge--announcement">📢 Announcements</span>',
+        general: '<span class="chat-source-badge chat-source-badge--general">🤖 AI</span>',
+      };
+      const badge = sourceBadgeMap[sourceType] || sourceBadgeMap.general;
+      aiDiv.querySelector('.chat-msg__bubble').innerHTML = badge + '<br/>' + fmtAI(answer);
+      document.getElementById('ai-source-indicator').textContent = `Source: ${sourceType}`;
+    } catch (e) {
+      aiDiv.querySelector('.chat-msg__bubble').innerHTML = `<span style="color:#f87171;">⚠️ Error: ${esc(e.message)}</span><br/><small style="color:#666;">Make sure backend is running at ${API.BASE_URL}</small>`;
+    }
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  /* ══════════════════════════════════════════════
+     RESULT EXTRACTION
+  ══════════════════════════════════════════════ */
+  document.getElementById('btn-find-result').addEventListener('click', findMyResult);
+  document.getElementById('result-roll-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); findMyResult(); }
+  });
+  document.getElementById('result-name-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); findMyResult(); }
+  });
+
+  async function findMyResult() {
+    const rollInput = document.getElementById('result-roll-input').value.trim().toUpperCase();
+    const nameInput = document.getElementById('result-name-input').value.trim();
+    const branchFilter = document.getElementById('result-filter-branch').value;
+    const semFilter = document.getElementById('result-filter-sem').value;
+    if (!rollInput && !nameInput) { showToast('Roll number ya naam enter karo'); return; }
+
+    const statusEl = document.getElementById('result-extract-status');
+    const btn = document.getElementById('btn-find-result');
+    statusEl.style.display = 'block';
+    const filterNote = (branchFilter || semFilter) ? ` (${branchFilter || 'Any Branch'}, ${semFilter ? 'Sem '+semFilter : 'Any Sem'})` : '';
+    statusEl.innerHTML = `<span style="color:#a89cff;">🔍 AI searching PDFs for ${esc(rollInput || nameInput)}${esc(filterNote)}… please wait (15-30 sec)</span>`;
+    btn.disabled = true; btn.textContent = 'Searching…';
+
+    try {
+      const data = await API.extractMyResult(
+        rollInput || null,
+        nameInput || null,
+        null,
+        branchFilter || null,
+        semFilter ? parseInt(semFilter) : null
+      );
+
+      if (data.found) {
+        statusEl.style.display = 'none';
+        renderResultCard(data);
+      } else {
+        statusEl.innerHTML = `<span style="color:#f87171;">❌ ${esc(data.message || 'Result nahi mila.')}</span>`;
+      }
+    } catch (e) {
+      statusEl.innerHTML = `<span style="color:#f87171;">⚠️ Error: ${esc(e.message)}</span>`;
+    }
+    btn.disabled = false; btn.textContent = '🔍 Find My Result';
+  }
+
+  function renderResultCard(data) {
+    const meta = data.result_metadata || {};
+    const subjects = data.subjects || [];
+    const passGrades = ['A+', 'A', 'B+', 'B', 'C', 'D', 'P', 'Pass', 'pass'];
+
+    const subjectRows = subjects.map(s => {
+      const isPass = passGrades.includes(s.grade) || (parseInt(s.marks_obtained) >= 40);
+      return `<tr>
+        <td>${esc(s.subject_code || '—')}</td>
+        <td>${esc(s.subject_name || '—')}</td>
+        <td>${esc(s.marks_obtained || '—')}</td>
+        <td>${esc(s.max_marks || '—')}</td>
+        <td class="${isPass ? 'grade-pass' : 'grade-fail'}">${esc(s.grade || '—')}</td>
+      </tr>`;
+    }).join('');
+
+    const statusColor = (data.result_status || '').toLowerCase().includes('pass') ? '#4ade80' : '#f87171';
+
+    const html = `
+      <div class="result-card">
+        <div class="result-card__header">
+          <div>
+            <span class="result-card__badge">${esc(meta.degree || '')} • ${esc(meta.branch || '')} • Sem ${esc(String(meta.semester || ''))}</span>
+            <div class="result-card__student" style="margin-top:8px;">${esc(data.student_name || 'Student')}</div>
+            <div class="result-card__roll">Roll: ${esc(data.roll_number || '—')} &nbsp;|&nbsp; ${esc(meta.type || '')} Exam ${esc(String(meta.year || ''))}</div>
+          </div>
+          <a href="${API.fileUrl(meta.file_path)}" target="_blank" class="btn btn--ghost btn--sm">📄 View PDF</a>
+        </div>
+
+        ${subjects.length ? `
+        <table class="result-table">
+          <thead><tr><th>Code</th><th>Subject</th><th>Marks</th><th>Max</th><th>Grade</th></tr></thead>
+          <tbody>${subjectRows}</tbody>
+        </table>` : `<p style="color:#888;font-size:13px;">${esc(data.message || 'Subjects detail unavailable')}</p>`}
+
+        <div class="result-summary">
+          ${data.sgpa ? `<div class="result-stat"><div class="result-stat__val">${esc(data.sgpa)}</div><div class="result-stat__label">SGPA</div></div>` : ''}
+          ${data.cgpa ? `<div class="result-stat"><div class="result-stat__val">${esc(data.cgpa)}</div><div class="result-stat__label">CGPA</div></div>` : ''}
+          ${data.percentage ? `<div class="result-stat"><div class="result-stat__val">${esc(data.percentage)}</div><div class="result-stat__label">Percentage</div></div>` : ''}
+          ${data.result_status ? `<div class="result-stat"><div class="result-stat__val" style="color:${statusColor};font-size:15px;">${esc(data.result_status)}</div><div class="result-stat__label">Status</div></div>` : ''}
+        </div>
+        ${data.remarks ? `<p style="font-size:12px;color:#888;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);">📝 ${esc(data.remarks)}</p>` : ''}
+      </div>`;
+
+    const container = document.getElementById('result-card-container');
+    container.innerHTML = html;
+    container.style.display = 'block';
+    container.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Browse all results
+  document.getElementById('btn-load-results').addEventListener('click', async () => {
+    const grid = document.getElementById('results-files-grid');
+    const stateEl = document.getElementById('results-list-state');
+    stateEl.innerHTML = '<div class="pyq-state-box__icon">⏳</div><h3 class="pyq-state-box__title">Loading results…</h3>';
+
+    try {
+      const results = await API.listResults();
+      if (!results || !results.length) {
+        stateEl.innerHTML = '<div class="pyq-state-box__icon">📭</div><h3 class="pyq-state-box__title">No results uploaded yet</h3><p class="pyq-state-box__msg">Admin abhi tak koi result upload nahi kiya.</p>';
+        grid.style.display = 'none';
+        return;
+      }
+      stateEl.style.display = 'none';
+      grid.style.display = 'grid';
+      grid.innerHTML = results.map(r => `
+        <div class="result-file-card">
+          <div class="result-file-card__title">📊 ${esc(r.degree)} ${esc(r.branch)} — Sem ${r.semester}</div>
+          <div class="result-file-card__meta">
+            ${esc(r.type)} &nbsp;|&nbsp; ${r.year}<br/>
+            ${esc(r.original_filename)}
+          </div>
+          <div style="display:flex;gap:8px;">
+            <a href="${API.fileUrl(r.file_path)}" target="_blank" class="btn btn--ghost btn--sm" style="font-size:11px;">📄 View PDF</a>
+            <button class="btn btn--primary btn--sm" style="font-size:11px;" onclick="prefillResultSearch(${r.id})">🔍 Find My Marks</button>
+          </div>
+        </div>`).join('');
+    } catch (e) {
+      stateEl.innerHTML = `<div class="pyq-state-box__icon">⚠️</div><h3 class="pyq-state-box__title">Error</h3><p class="pyq-state-box__msg">${esc(e.message)}</p>`;
+    }
+  });
+
+  window.prefillResultSearch = function(resultId) {
+    document.querySelector('[data-section="results"]').scrollIntoView();
+    document.getElementById('result-roll-input').focus();
+    showToast('Roll number bharo aur Find karo!');
+  };
+
+  /* ══════════════════════════════════════════════
+     REAL-TIME UPDATES (localStorage events from teacher tab)
+  ══════════════════════════════════════════════ */
+  window.addEventListener('storage', e => {
+    if (e.key === 'nitkkr_notifications') { updateNotifBadge(); const sec = document.getElementById('section-notifications'); if (sec?.classList.contains('dash-section--active')) renderNotifications(); try { const n = JSON.parse(e.newValue || '[]'), o = e.oldValue ? JSON.parse(e.oldValue) : []; if (n.length > o.length) showToast('🔔 ' + n[0].text.slice(0, 60) + '…'); } catch {} }
+    if (e.key === 'nitkkr_assignments') { updateAsgnBadge(); const sec = document.getElementById('section-assignments'); if (sec?.classList.contains('dash-section--active')) renderAsgnList(); }
+    if (e.key === 'nitkkr_notes' || e.key === 'nitkkr_lab_manuals') { const sec = document.getElementById('section-resources'); if (sec?.classList.contains('dash-section--active')) renderResources(); }
+    if (e.key === 'nitkkr_announcements') { const sec = document.getElementById('section-announcements'); if (sec?.classList.contains('dash-section--active')) renderAnnouncements(); }
+  });
+
+  /* ══════════════════════════════════════════════
+     LOAD NOTIFICATIONS & ANNOUNCEMENTS FROM BACKEND
+  ══════════════════════════════════════════════ */
+  async function loadBackendNotifications() {
+    try {
+      const notifs = await API.getAllNotifications();
+      if (notifs && notifs.length) {
+        // Merge with localStorage notifications
+        const existing = DB.Notifications.getAll().map(n => n.id);
+        notifs.forEach(n => {
+          const lid = 'backend_notif_' + n.id;
+          if (!existing.includes(lid)) {
+            DB.Notifications.add({ id: lid, text: n.title, time: n.uploaded_at, icon: '📋', read: false });
+          }
+        });
+        updateNotifBadge();
+        const sec = document.getElementById('section-notifications');
+        if (sec?.classList.contains('dash-section--active')) renderNotifications();
+      }
+    } catch (e) { /* Backend might not be running — silently fail */ }
+  }
+
+  async function loadBackendAnnouncements() {
+    try {
+      const anns = await API.getAllAnnouncements();
+      if (anns && anns.length) {
+        const annList = document.getElementById('ann-list');
+        const annEmpty = document.getElementById('ann-empty');
+        if (annList) {
+          annEmpty?.classList.add('hidden');
+          annList.classList.remove('hidden');
+          const backendHtml = anns.map(a => `
+            <div class="ann-card">
+              <div class="ann-card__title">📢 ${esc(a.title)}</div>
+              <div class="ann-card__meta">${a.uploaded_at ? new Date(a.uploaded_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : ''} &nbsp;|&nbsp; <a href="${API.fileUrl(a.file_path)}" target="_blank" style="color:#a89cff;">View PDF →</a></div>
+            </div>`).join('');
+          // Prepend backend announcements
+          annList.insertAdjacentHTML('afterbegin', backendHtml);
+        }
+      }
+    } catch (e) { /* Silently fail */ }
+  }
+
+  /* INIT */
+  updateNotifBadge();
+  updateAsgnBadge();
+  renderAsgnList();
+  renderAnnouncements();
+  // Load backend data
+  loadBackendNotifications();
+  loadBackendAnnouncements();
+  // Pre-fill search from URL
+  const qp=new URLSearchParams(window.location.search).get('q');
+  if(qp){searchInp.value=qp;runQuery();updateChips();}
+  /* ══════════════════════════════════════════════
+     HOME DASHBOARD JS (Fix #4 #5 #6 #7 #8)
+  ══════════════════════════════════════════════ */
+
+  // goSection — navigate from home cards to sidebar sections
+  function goSection(sectionName) {
+    const navItem = document.querySelector(`.sidebar__nav-item[data-section="${sectionName}"]`);
+    if (navItem) navItem.click();
+  }
+  window.goSection = goSection;
+
+  // PYQ Hub toggle (Fix #8)
+  function togglePyqHub() {
+    const grid = document.getElementById('pyqSubGrid');
+    const arrow = document.getElementById('pyqHubArrow');
+    const isOpen = grid.classList.toggle('open');
+    arrow.textContent = isOpen ? 'Collapse ↑' : 'Explore Resources →';
+  }
+  window.togglePyqHub = togglePyqHub;
+
+  // Set greeting
+  const storedName = localStorage.getItem('user_name') || sessionStorage.getItem('user_name') || 'Student';
+  const greetEl = document.getElementById('home-greeting');
+  if (greetEl) greetEl.textContent = storedName.split(' ')[0];
+
+  // Load backend announcements on home page (Fix #6)
+  async function loadHomeAnnouncements() {
+    const container = document.getElementById('homeAnnList');
+    if (!container) return;
+    try {
+      const anns = await API.getAllAnnouncements();
+      if (!anns || !anns.length) {
+        container.innerHTML = '<div style="color:#555;font-size:0.8rem;padding:10px;">No announcements yet.</div>';
+        return;
+      }
+      container.innerHTML = anns.map((a, i) => {
+        const date = a.uploaded_at 
+          ? new Date(a.uploaded_at).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})
+          : 'Recent';
+        const isNew = i < 3;
+        const fileUrl = API.fileUrl ? API.fileUrl(a.file_path) : ('#');
+        return `<div class="home-ann-item" onclick="window.open('${fileUrl}','_blank')">
+          <div class="ann-indicator ${isNew ? 'ann-new-dot' : 'ann-old-dot'}"></div>
+          <div class="home-ann-title">${a.title}</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            ${isNew ? '<span class="ann-new-tag">NEW</span>' : ''}
+            <div class="home-ann-meta">${date}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+      // Also update announcement ticker
+      const doubled = [...anns, ...anns];
+      const tickerEl = document.getElementById('ticker-content');
+      if (tickerEl) {
+        tickerEl.textContent = doubled.map(a => '● ' + a.title).join('    ');
+      }
+    } catch(e) {
+      container.innerHTML = '<div style="color:#555;font-size:0.8rem;padding:10px;">Could not load announcements — backend may not be running.</div>';
+    }
+  }
+
+  // Load ticker on page load
+  loadHomeAnnouncements();
+  // Refresh every 60s for live updates (Fix #6)
+  setInterval(loadHomeAnnouncements, 60000);
+
+  // Also reload backend announcements section when user navigates there
+  const origAnnClick = document.querySelector('.sidebar__nav-item[data-section="announcements"]');
+  if (origAnnClick) {
+    origAnnClick.addEventListener('click', () => {
+      setTimeout(loadBackendAnnouncements, 100);
+    });
+  }
+
+  </script>
+</body>
+</html>

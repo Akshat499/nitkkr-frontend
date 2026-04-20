@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — NIT KKR Search</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+</head>
+<body id="body-login" class="page-login">
+
+  <!-- NAVBAR -->
+  <header id="navbar" class="navbar navbar--transparent">
+    <div class="navbar__inner">
+      <a href="index.html" id="navbar-logo" class="navbar__logo">
+        <span class="navbar__logo-icon">⬡</span>
+        <span class="navbar__logo-text">NIT<span class="navbar__logo-accent">KKR</span></span>
+      </a>
+      <div class="navbar__auth">
+        <a href="dashboard-student.html" class="btn btn--ghost btn--sm">Student Search</a>
+        <a href="index.html" class="btn btn--ghost btn--sm">← Back to Home</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="login-page">
+    <div class="login-page__bg-orb login-page__bg-orb--1" aria-hidden="true"></div>
+    <div class="login-page__bg-orb login-page__bg-orb--2" aria-hidden="true"></div>
+
+    <div id="login-container" class="login-container">
+
+      <!-- Left Info Panel -->
+      <div id="login-info-panel" class="login-info-panel">
+        <div class="login-info__logo">⬡</div>
+        <h2 class="login-info__heading">NIT KKR Knowledge Engine</h2>
+        <p class="login-info__subtext">
+          Restricted access for Teachers and Administrators. Login with your authorised NIT Kurukshetra credentials.
+        </p>
+        <div class="login-info__rules">
+          <div class="login-info__rule">
+            <span>👨‍🎓</span>
+            <span>Students — <strong>no login needed</strong>, <a href="dashboard-student.html" class="form-link">search directly</a></span>
+          </div>
+          <div class="login-info__rule">
+            <span>📚</span>
+            <span>Teachers — login with authorised email</span>
+          </div>
+          <div class="login-info__rule">
+            <span>🛡️</span>
+            <span>Admin — single authorised account</span>
+          </div>
+          <div class="login-info__rule">
+            <span>🔒</span>
+            <span>Only <strong>@nitkkr.ac.in</strong> emails accepted</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Form Panel -->
+      <div id="login-form-panel" class="login-form-panel">
+
+        <div id="login-form-header" class="login-form-panel__header">
+          <h3 class="auth-form__title">Welcome Back</h3>
+          <p class="auth-form__subtitle">Teachers & Admins only • @nitkkr.ac.in required</p>
+        </div>
+
+        <form id="form-login" class="auth-form auth-form--active" novalidate>
+
+          <div id="login-field-email" class="form-group">
+            <label for="login-email" class="form-label">Email Address</label>
+            <input
+              type="email"
+              id="login-email"
+              name="email"
+              class="form-input"
+              placeholder="faculty@nitkkr.ac.in"
+              autocomplete="email"
+              required
+            />
+            <span id="login-email-error" class="form-error"></span>
+          </div>
+
+          <div id="login-field-password" class="form-group">
+            <label for="login-password" class="form-label">Password</label>
+            <div class="form-input-wrapper">
+              <input
+                type="password"
+                id="login-password"
+                name="password"
+                class="form-input"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+              />
+              <button type="button" id="toggle-login-pw" class="form-input-toggle" aria-label="Toggle password">👁</button>
+            </div>
+            <span id="login-password-error" class="form-error"></span>
+          </div>
+
+          <!-- Error Alert Box -->
+          <div id="login-alert" class="login-alert hidden">
+            <span>⚠️</span>
+            <span id="login-alert-msg">Invalid email or password.</span>
+          </div>
+
+          <button type="submit" id="btn-login-submit" class="btn btn--primary btn--full btn--lg">
+            <span id="btn-login-text">Login</span>
+            <span id="btn-login-loader" class="hidden">Checking…</span>
+          </button>
+
+          <p class="login-student-redirect">
+            Are you a student? <a href="dashboard-student.html" class="form-link">Search without login →</a>
+          </p>
+
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="api.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    // ── Redirect if already logged in ─────────
+    (function () {
+      const session = Auth.getSession();
+      if (session) {
+        if (session.role === 'admin')   window.location.href = 'dashboard-admin.html';
+        else if (session.role === 'teacher') window.location.href = 'dashboard-teacher.html';
+      }
+    })();
+
+    // ── Login form submit ─────────────────────
+    document.getElementById('form-login').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const email    = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const alertEl  = document.getElementById('login-alert');
+      const alertMsg = document.getElementById('login-alert-msg');
+      const btnText  = document.getElementById('btn-login-text');
+      const btnLoad  = document.getElementById('btn-login-loader');
+
+      // Reset errors
+      alertEl.classList.add('hidden');
+      document.getElementById('login-email-error').textContent    = '';
+      document.getElementById('login-password-error').textContent = '';
+
+      // Validate
+      if (!email) {
+        document.getElementById('login-email-error').textContent = 'Email is required.';
+        return;
+      }
+      if (!email.endsWith('@nitkkr.ac.in')) {
+        document.getElementById('login-email-error').textContent = 'Only @nitkkr.ac.in emails are allowed.';
+        return;
+      }
+      if (!password) {
+        document.getElementById('login-password-error').textContent = 'Password is required.';
+        return;
+      }
+
+      // Show loader
+      btnText.classList.add('hidden');
+      btnLoad.classList.remove('hidden');
+      document.getElementById('btn-login-submit').disabled = true;
+
+      // Step 1: Try backend JWT login first
+      let backendResult = null;
+      try {
+        backendResult = await API.login(email, password);
+      } catch (err) {
+        console.warn('Backend login error:', err.message);
+      }
+
+      btnText.classList.remove('hidden');
+      btnLoad.classList.add('hidden');
+      document.getElementById('btn-login-submit').disabled = false;
+
+      if (backendResult && backendResult.success) {
+        // Backend login succeeded → redirect by role
+        if (backendResult.role === 'admin') window.location.href = 'dashboard-admin.html';
+        else if (backendResult.role === 'teacher') window.location.href = 'dashboard-teacher.html';
+        else window.location.href = 'dashboard-student.html';
+        return;
+      }
+
+      // Step 2: Fallback to local auth (admin & teacher from config.json)
+      const localResult = await Auth.login(email, password);
+      if (localResult.success) {
+        if (localResult.role === 'admin')   window.location.href = 'dashboard-admin.html';
+        else if (localResult.role === 'teacher') window.location.href = 'dashboard-teacher.html';
+        return;
+      }
+
+      // Both failed
+      alertMsg.textContent = 'Invalid email or password.';
+      alertEl.classList.remove('hidden');
+    });
+
+
+    // ── Password toggle ───────────────────────
+    document.getElementById('toggle-login-pw').addEventListener('click', function () {
+      const inp = document.getElementById('login-password');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      this.textContent = inp.type === 'password' ? '👁' : '🙈';
+    });
+
+    // ── Clear alert on input ──────────────────
+    ['login-email','login-password'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        document.getElementById('login-alert').classList.add('hidden');
+      });
+    });
+  </script>
+</body>
+</html>

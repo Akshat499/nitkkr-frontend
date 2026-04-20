@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Dashboard — NIT KKR</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    .upload-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+    .upload-tab{padding:8px 18px;border-radius:99px;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#aaa;cursor:pointer;transition:.2s;}
+    .upload-tab.active,.upload-tab:hover{background:var(--clr-primary);border-color:var(--clr-primary);color:#fff;}
+    .uploaded-item{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+    .uploaded-item__info{flex:1;}
+    .uploaded-item__title{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;}
+    .uploaded-item__meta{font-size:12px;color:#888;}
+    .asgn-form-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;margin-bottom:24px;}
+    .asgn-form-card h4{font-size:16px;font-weight:700;color:#fff;margin-bottom:16px;}
+    .my-items-list{margin-top:20px;}
+    .my-item-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;margin-bottom:10px;}
+    .my-item-card__header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;}
+    .my-item-card__title{font-size:14px;font-weight:700;color:#fff;}
+    .my-item-card__meta{font-size:12px;color:#888;line-height:1.6;}
+    .status-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid;}
+    .status-tag--active{color:#4ade80;background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.25);}
+    .status-tag--expired{color:#f87171;background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.25);}
+    .attach-preview{margin-top:10px;padding:10px;background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:8px;font-size:12px;color:#a89cff;}
+  </style>
+</head>
+<body id="body-dashboard" class="page-dashboard page-dashboard--teacher">
+
+  <!-- AUTO-LOGOUT WARNING -->
+  <div id="autologout-overlay" class="autologout-overlay hidden" aria-modal="true">
+    <div class="autologout-modal">
+      <div class="autologout-modal__icon">⏱️</div>
+      <h3 class="autologout-modal__title">Session Expiring</h3>
+      <p class="autologout-modal__msg">No activity detected. Logging out in <span id="autologout-countdown" class="autologout-modal__countdown">120</span> seconds.</p>
+      <div class="autologout-modal__actions">
+        <button id="btn-stay-logged-in" class="btn btn--primary">Stay Logged In</button>
+        <button id="btn-logout-now" class="btn btn--ghost">Logout Now</button>
+      </div>
+    </div>
+  </div>
+  <div id="force-logout-overlay" class="autologout-overlay hidden">
+    <div class="autologout-modal autologout-modal--danger">
+      <div class="autologout-modal__icon">🔒</div>
+      <h3 class="autologout-modal__title">Session Ended</h3>
+      <p class="autologout-modal__msg" id="force-logout-msg">Session ended due to inactivity.</p>
+      <div class="autologout-modal__actions">
+        <button id="btn-relogin" class="btn btn--primary btn--full">Login Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar sidebar--teacher">
+    <div class="sidebar__logo">
+      <span class="navbar__logo-icon">⬡</span>
+      <span class="sidebar__logo-text">NIT<span class="navbar__logo-accent">KKR</span></span>
+    </div>
+    <div class="sidebar__user">
+      <div class="sidebar__avatar sidebar__avatar--teacher" id="sidebar-avatar">T</div>
+      <div class="sidebar__user-info">
+        <span class="sidebar__user-name" id="sidebar-user-name">Teacher</span>
+        <span class="sidebar__user-role" id="sidebar-user-role">Faculty</span>
+      </div>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="#" class="sidebar__nav-item sidebar__nav-item--active" data-section="upload"><span class="sidebar__nav-icon">📤</span> Upload Material</a>
+      <a href="#" class="sidebar__nav-item" data-section="my-uploads"><span class="sidebar__nav-icon">📁</span> My Uploads</a>
+      <a href="#" class="sidebar__nav-item" data-section="assignments"><span class="sidebar__nav-icon">📝</span> Assignments</a>
+      <a href="#" class="sidebar__nav-item" data-section="announcements"><span class="sidebar__nav-icon">📢</span> Announcements</a>
+      <a href="#" class="sidebar__nav-item" data-section="ai-chat"><span class="sidebar__nav-icon">🤖</span> AI Assistant</a>
+      <a href="#" class="sidebar__nav-item" data-section="todo"><span class="sidebar__nav-icon">✅</span> To-Do</a>
+    </nav>
+    <div class="sidebar-session-info">
+      <span class="sidebar-session-info__icon">🟢</span>
+      <div>
+        <span class="sidebar-session-info__label">Session Active</span>
+        <span class="session-timer-display sidebar-session-info__timer" id="sidebar-timer">30m</span>
+      </div>
+    </div>
+    <button id="sidebar-logout" class="sidebar__logout sidebar__logout--prominent">🚪 Logout</button>
+  </aside>
+
+  <!-- MAIN -->
+  <div id="dashboard-main" class="dashboard-main">
+    <header id="topbar" class="topbar">
+      <button id="sidebar-toggle" class="topbar__sidebar-toggle">☰</button>
+      <div id="topbar-title" class="topbar__title">Upload Material</div>
+      <div class="topbar__actions">
+        <div class="topbar-session-badge">
+          <span class="topbar-session-badge__dot"></span>
+          <span class="session-timer-display" id="topbar-timer-label">30m</span>
+        </div>
+        <button id="topbar-logout-btn" class="btn btn--danger btn--sm">🚪 Logout</button>
+        <div class="topbar__avatar topbar__avatar--teacher" id="topbar-avatar">T</div>
+      </div>
+    </header>
+
+    <div id="dashboard-content" class="dashboard-content">
+
+      <!-- ════ UPLOAD MATERIAL ════ -->
+      <section id="section-upload" class="dash-section dash-section--active" data-section="upload">
+        <div class="dash-section__header">
+          <div>
+            <h2 class="dash-section__title">Upload Material</h2>
+            <p class="dash-section__subtitle">Upload PYQs, Notes, or Lab Manuals — instantly visible to students</p>
+          </div>
+        </div>
+
+        <div class="upload-tabs">
+          <button class="upload-tab active" data-utab="pyq">📄 PYQ / Question Paper</button>
+          <button class="upload-tab" data-utab="notes">📒 Notes</button>
+          <button class="upload-tab" data-utab="lab">🔬 Lab Manual</button>
+        </div>
+
+        <!-- PYQ UPLOAD FORM -->
+        <div id="upload-panel-pyq" class="upload-panel upload-card">
+          <div id="pyq-upload-success" class="add-teacher-success hidden">✅ Question paper uploaded! Students can now find it in PYQ search.</div>
+          <div id="pyq-upload-error" class="login-alert hidden" style="margin:0 0 12px;"><span>⚠️</span><span id="pyq-upload-error-text">Please fill all required fields.</span></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Paper Title *</label><input type="text" id="pyq-title" class="form-input" placeholder="e.g. Web Design End Semester 2024" /></div>
+            <div class="form-group"><label class="form-label">Subject Name *</label><input type="text" id="pyq-subject" class="form-input" placeholder="e.g. Web Design, DBMS, CN" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Branch *</label>
+              <select id="pyq-branch" class="form-select">
+                <option value="">— Select Branch —</option>
+                <option value="cse">CSE</option><option value="ece">ECE</option><option value="me">ME</option><option value="ee">EE</option><option value="ce">CE</option><option value="it">IT</option><option value="che">CHE</option><option value="mca">MCA</option><option value="mba">MBA</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Semester *</label>
+              <select id="pyq-sem" class="form-select">
+                <option value="">— Select Semester —</option>
+                <option value="1">Semester 1</option><option value="2">Semester 2</option><option value="3">Semester 3</option><option value="4">Semester 4</option><option value="5">Semester 5</option><option value="6">Semester 6</option><option value="7">Semester 7</option><option value="8">Semester 8</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Exam Type *</label>
+              <select id="pyq-exam-type" class="form-select">
+                <option value="">— Select —</option>
+                <option value="end">End Semester</option>
+                <option value="mid">Mid Semester</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Year *</label>
+              <select id="pyq-year" class="form-select">
+                <option value="">— Select Year —</option>
+                <option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Upload PDF *</label>
+            <div id="pyq-dropzone" class="upload-dropzone">
+              <span class="upload-dropzone__icon">📄</span>
+              <p id="pyq-dropzone-label">Drag & drop PDF or <label for="pyq-file-input" class="form-link" style="cursor:pointer;">browse</label></p>
+              <input type="file" id="pyq-file-input" accept=".pdf" hidden />
+              <span class="upload-dropzone__hint">Only PDF • Max 10 MB</span>
+            </div>
+          </div>
+          <button id="btn-upload-pyq" class="btn btn--primary" style="margin-top:8px;">Upload Question Paper →</button>
+        </div>
+
+        <!-- NOTES UPLOAD FORM -->
+        <div id="upload-panel-notes" class="upload-panel upload-card hidden">
+          <div id="notes-upload-success" class="add-teacher-success hidden">✅ Notes uploaded successfully!</div>
+          <div id="notes-upload-error" class="login-alert hidden" style="margin:0 0 12px;"><span>⚠️</span><span id="notes-upload-error-text">Please fill all required fields.</span></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Title *</label><input type="text" id="notes-title" class="form-input" placeholder="e.g. Unit 1 - Introduction to DBMS" /></div>
+            <div class="form-group"><label class="form-label">Subject *</label><input type="text" id="notes-subject" class="form-input" placeholder="Subject name" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Branch *</label>
+              <select id="notes-branch" class="form-select">
+                <option value="">— Select Branch —</option>
+                <option value="cse">CSE</option><option value="ece">ECE</option><option value="me">ME</option><option value="ee">EE</option><option value="ce">CE</option><option value="it">IT</option><option value="che">CHE</option><option value="mca">MCA</option><option value="mba">MBA</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Semester *</label>
+              <select id="notes-sem" class="form-select">
+                <option value="">— Select Semester —</option>
+                <option value="1">Sem 1</option><option value="2">Sem 2</option><option value="3">Sem 3</option><option value="4">Sem 4</option><option value="5">Sem 5</option><option value="6">Sem 6</option><option value="7">Sem 7</option><option value="8">Sem 8</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Unit / Chapter (optional)</label><input type="text" id="notes-unit" class="form-input" placeholder="e.g. Unit 1, Chapter 3" /></div>
+            <div class="form-group"><label class="form-label">Description (optional)</label><input type="text" id="notes-desc" class="form-input" placeholder="Brief description" /></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Upload PDF *</label>
+            <div id="notes-dropzone" class="upload-dropzone">
+              <span class="upload-dropzone__icon">📒</span>
+              <p id="notes-dropzone-label">Drag & drop PDF or <label for="notes-file-input" class="form-link" style="cursor:pointer;">browse</label></p>
+              <input type="file" id="notes-file-input" accept=".pdf" hidden />
+              <span class="upload-dropzone__hint">Only PDF • Max 10 MB</span>
+            </div>
+          </div>
+          <button id="btn-upload-notes" class="btn btn--primary" style="margin-top:8px;">Upload Notes →</button>
+        </div>
+
+        <!-- LAB MANUAL UPLOAD FORM -->
+        <div id="upload-panel-lab" class="upload-panel upload-card hidden">
+          <div id="lab-upload-success" class="add-teacher-success hidden">✅ Lab manual uploaded successfully!</div>
+          <div id="lab-upload-error" class="login-alert hidden" style="margin:0 0 12px;"><span>⚠️</span><span id="lab-upload-error-text">Please fill all required fields.</span></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Title *</label><input type="text" id="lab-title" class="form-input" placeholder="e.g. DSA Lab Manual 2024" /></div>
+            <div class="form-group"><label class="form-label">Subject *</label><input type="text" id="lab-subject" class="form-input" placeholder="Subject name" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Branch *</label>
+              <select id="lab-branch" class="form-select">
+                <option value="">— Select Branch —</option>
+                <option value="cse">CSE</option><option value="ece">ECE</option><option value="me">ME</option><option value="ee">EE</option><option value="ce">CE</option><option value="it">IT</option><option value="che">CHE</option><option value="mca">MCA</option><option value="mba">MBA</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Semester *</label>
+              <select id="lab-sem" class="form-select">
+                <option value="">— Select Semester —</option>
+                <option value="1">Sem 1</option><option value="2">Sem 2</option><option value="3">Sem 3</option><option value="4">Sem 4</option><option value="5">Sem 5</option><option value="6">Sem 6</option><option value="7">Sem 7</option><option value="8">Sem 8</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Number of Labs</label><input type="number" id="lab-count" class="form-input" placeholder="e.g. 12" min="1" /></div>
+            <div class="form-group"><label class="form-label">Description (optional)</label><input type="text" id="lab-desc" class="form-input" placeholder="Brief description" /></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Upload PDF *</label>
+            <div id="lab-dropzone" class="upload-dropzone">
+              <span class="upload-dropzone__icon">🔬</span>
+              <p id="lab-dropzone-label">Drag & drop PDF or <label for="lab-file-input" class="form-link" style="cursor:pointer;">browse</label></p>
+              <input type="file" id="lab-file-input" accept=".pdf" hidden />
+              <span class="upload-dropzone__hint">Only PDF • Max 10 MB</span>
+            </div>
+          </div>
+          <button id="btn-upload-lab" class="btn btn--primary" style="margin-top:8px;">Upload Lab Manual →</button>
+        </div>
+      </section>
+
+      <!-- ════ MY UPLOADS ════ -->
+      <section id="section-my-uploads" class="dash-section" data-section="my-uploads">
+        <div class="dash-section__header">
+          <div><h2 class="dash-section__title">My Uploads</h2><p class="dash-section__subtitle">All materials you have uploaded</p></div>
+          <button id="btn-refresh-uploads" class="btn btn--ghost btn--sm">↻ Refresh</button>
+        </div>
+        <div class="upload-tabs" id="myupload-tabs">
+          <button class="upload-tab active" data-mutab="pyq">📄 PYQs</button>
+          <button class="upload-tab" data-mutab="notes">📒 Notes</button>
+          <button class="upload-tab" data-mutab="lab">🔬 Lab Manuals</button>
+        </div>
+        <div id="myupload-panel-pyq" class="myupload-panel">
+          <div id="my-pyq-empty" class="pyq-state-box"><div class="pyq-state-box__icon">📄</div><h3 class="pyq-state-box__title">No PYQs Uploaded</h3><p class="pyq-state-box__msg">Upload question papers to see them here.</p></div>
+          <div id="my-pyq-list" class="my-items-list"></div>
+        </div>
+        <div id="myupload-panel-notes" class="myupload-panel hidden">
+          <div id="my-notes-empty" class="pyq-state-box"><div class="pyq-state-box__icon">📒</div><h3 class="pyq-state-box__title">No Notes Uploaded</h3><p class="pyq-state-box__msg">Upload notes to see them here.</p></div>
+          <div id="my-notes-list" class="my-items-list"></div>
+        </div>
+        <div id="myupload-panel-lab" class="myupload-panel hidden">
+          <div id="my-lab-empty" class="pyq-state-box"><div class="pyq-state-box__icon">🔬</div><h3 class="pyq-state-box__title">No Lab Manuals Uploaded</h3><p class="pyq-state-box__msg">Upload lab manuals to see them here.</p></div>
+          <div id="my-lab-list" class="my-items-list"></div>
+        </div>
+      </section>
+
+      <!-- ════ ASSIGNMENTS ════ -->
+      <section id="section-assignments" class="dash-section" data-section="assignments">
+        <div class="dash-section__header">
+          <div><h2 class="dash-section__title">Assignments</h2><p class="dash-section__subtitle">Post and manage assignments for your students</p></div>
+        </div>
+
+        <div class="asgn-form-card">
+          <h4>➕ Post New Assignment</h4>
+          <div id="asgn-post-success" class="add-teacher-success hidden">✅ Assignment posted! Students can see it now.</div>
+          <div id="asgn-post-error" class="login-alert hidden" style="margin:0 0 12px;"><span>⚠️</span><span id="asgn-post-error-text">Please fill required fields.</span></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Assignment Title *</label><input type="text" id="asgn-title" class="form-input" placeholder="e.g. Assignment 1 - Binary Trees" /></div>
+            <div class="form-group"><label class="form-label">Subject *</label><input type="text" id="asgn-subject" class="form-input" placeholder="Subject name" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Branch *</label>
+              <select id="asgn-branch" class="form-select">
+                <option value="">— Select Branch —</option>
+                <option value="cse">CSE</option><option value="ece">ECE</option><option value="me">ME</option><option value="ee">EE</option><option value="ce">CE</option><option value="it">IT</option><option value="che">CHE</option><option value="mca">MCA</option><option value="mba">MBA</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Semester *</label>
+              <select id="asgn-sem" class="form-select">
+                <option value="">— Select Semester —</option>
+                <option value="1">Sem 1</option><option value="2">Sem 2</option><option value="3">Sem 3</option><option value="4">Sem 4</option><option value="5">Sem 5</option><option value="6">Sem 6</option><option value="7">Sem 7</option><option value="8">Sem 8</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Due Date *</label><input type="date" id="asgn-due" class="form-input" /></div>
+            <div class="form-group"><label class="form-label">Max Marks (optional)</label><input type="number" id="asgn-marks" class="form-input" placeholder="e.g. 20" min="0" /></div>
+          </div>
+          <div class="form-group"><label class="form-label">Description / Instructions (optional)</label><textarea id="asgn-desc" class="form-input" rows="3" style="resize:vertical;" placeholder="Describe the assignment, submission format, or any instructions..."></textarea></div>
+          <div class="form-group">
+            <label class="form-label">Attachment (PDF or Image, optional)</label>
+            <div id="asgn-dropzone" class="upload-dropzone" style="padding:16px 20px;">
+              <span class="upload-dropzone__icon">📎</span>
+              <p id="asgn-dropzone-label">Attach a file (PDF/Image) — <label for="asgn-file-input" class="form-link" style="cursor:pointer;">browse</label></p>
+              <input type="file" id="asgn-file-input" accept=".pdf,image/*" hidden />
+              <span class="upload-dropzone__hint">PDF or image • Max 5 MB</span>
+            </div>
+            <div id="asgn-attach-preview" class="attach-preview hidden"></div>
+          </div>
+          <button id="btn-post-asgn" class="btn btn--primary">Post Assignment →</button>
+        </div>
+
+        <!-- My Assignments List -->
+        <div>
+          <h4 style="font-size:15px;font-weight:700;color:#fff;margin-bottom:12px;">My Posted Assignments</h4>
+          <div id="my-asgn-empty" class="pyq-state-box"><div class="pyq-state-box__icon">📝</div><h3 class="pyq-state-box__title">No Assignments Posted</h3><p class="pyq-state-box__msg">Post assignments above to see them here.</p></div>
+          <div id="my-asgn-list" class="my-items-list"></div>
+        </div>
+      </section>
+
+      <!-- ════ ANNOUNCEMENTS ════ -->
+      <section id="section-announcements" class="dash-section" data-section="announcements">
+        <div class="dash-section__header">
+          <div><h2 class="dash-section__title">Announcements</h2><p class="dash-section__subtitle">Post announcements visible to all students</p></div>
+        </div>
+        <div class="asgn-form-card">
+          <h4>📢 Post New Announcement</h4>
+          <div id="ann-post-success" class="add-teacher-success hidden">✅ Announcement posted!</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Title *</label><input type="text" id="ann-title" class="form-input" placeholder="Announcement title" /></div>
+            <div class="form-group"><label class="form-label">Type</label>
+              <select id="ann-type" class="form-select">
+                <option value="general">General</option>
+                <option value="urgent">🚨 Urgent</option>
+                <option value="exam">Exam Related</option>
+                <option value="holiday">Holiday / Off</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">For Branch (leave blank for all)</label>
+              <select id="ann-branch" class="form-select">
+                <option value="all">All Branches</option>
+                <option value="cse">CSE</option><option value="ece">ECE</option><option value="me">ME</option><option value="ee">EE</option><option value="ce">CE</option><option value="it">IT</option><option value="che">CHE</option><option value="mca">MCA</option><option value="mba">MBA</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Expires On (optional)</label><input type="date" id="ann-expires" class="form-input" /></div>
+          </div>
+          <div class="form-group"><label class="form-label">Message Body (optional)</label><textarea id="ann-body" class="form-input" rows="3" style="resize:vertical;" placeholder="Details of the announcement..."></textarea></div>
+          <button id="btn-post-ann" class="btn btn--primary">Post Announcement →</button>
+        </div>
+        <div>
+          <h4 style="font-size:15px;font-weight:700;color:#fff;margin-bottom:12px;">My Announcements</h4>
+          <div id="my-ann-empty" class="pyq-state-box"><div class="pyq-state-box__icon">📢</div><h3 class="pyq-state-box__title">No Announcements</h3><p class="pyq-state-box__msg">Post announcements above.</p></div>
+          <div id="my-ann-list" class="my-items-list"></div>
+        </div>
+      </section>
+
+      <!-- ════ AI ASSISTANT ════ -->
+      <section id="section-ai-chat" class="dash-section" data-section="ai-chat">
+        <div class="dash-section__header"><div><h2 class="dash-section__title">AI Assistant</h2><p class="dash-section__subtitle">Powered by RAG — access institute policies, student results, and AI help</p></div>
+          <button id="btn-clear-teacher-chat" class="btn btn--ghost btn--sm">🗑 Clear</button>
+        </div>
+
+        <!-- Quick suggestions for teachers -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:6px 14px;font-size:12px;color:#aaa;cursor:pointer;transition:.15s;" onclick="teacherSuggest(this)" onmouseover="this.style.background='rgba(108,99,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">📋 Attendance policy rules</div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:6px 14px;font-size:12px;color:#aaa;cursor:pointer;transition:.15s;" onclick="teacherSuggest(this)" onmouseover="this.style.background='rgba(108,99,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">📝 Generate 5 DBMS questions Sem 4</div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:6px 14px;font-size:12px;color:#aaa;cursor:pointer;transition:.15s;" onclick="teacherSuggest(this)" onmouseover="this.style.background='rgba(108,99,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">🎓 Scholarship policy latest</div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:6px 14px;font-size:12px;color:#aaa;cursor:pointer;transition:.15s;" onclick="teacherSuggest(this)" onmouseover="this.style.background='rgba(108,99,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">📊 CSE Sem 3 result summary</div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:6px 14px;font-size:12px;color:#aaa;cursor:pointer;transition:.15s;" onclick="teacherSuggest(this)" onmouseover="this.style.background='rgba(108,99,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">📢 Latest announcements</div>
+        </div>
+
+        <div class="ai-chat-container">
+          <div id="ai-chat-messages" class="ai-chat-messages">
+            <div class="chat-msg chat-msg--ai">
+              <span class="chat-msg__avatar">⬡</span>
+              <div class="chat-msg__bubble"><strong>Hello ${SESSION.name || 'Teacher'}!</strong> Main NIT KKR ka AI Assistant hun.<br/><br/>
+                Aap mujhse ye poochh sakte ho:<br/>
+                📋 <strong>Institute Policies</strong> — Attendance, internship, scholarship rules<br/>
+                📊 <strong>Student Results</strong> — Branch ke results browse karo<br/>
+                📝 <strong>Question Generation</strong> — Exam ke liye questions generate karo<br/>
+                📢 <strong>Announcements</strong> — Official notices<br/><br/>
+                <em style="color:#888;font-size:12px;">Backed by RAG — answers from actual uploaded documents</em>
+              </div>
+            </div>
+          </div>
+          <div class="ai-chat-input-bar">
+            <input type="text" id="ai-chat-input" class="form-input" placeholder="Ask anything... (e.g. 'attendance rules 2024' ya 'Generate 5 questions on OS')" />
+            <button id="ai-chat-send-btn" class="btn btn--primary">Send ↑</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ TO-DO ════ -->
+      <section id="section-todo" class="dash-section" data-section="todo">
+        <div class="dash-section__header"><div><h2 class="dash-section__title">To-Do List</h2><p class="dash-section__subtitle">Track your tasks and academic duties</p></div></div>
+        <div class="todo-container">
+          <div class="todo-add">
+            <input type="text" id="todo-input" class="form-input" placeholder="Add a task..." />
+            <select id="todo-priority" class="form-select todo-priority-select">
+              <option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option>
+            </select>
+            <input type="date" id="todo-due" class="form-input todo-due-input" />
+            <button id="todo-add-btn" class="btn btn--primary">Add</button>
+          </div>
+          <div class="todo-filter-tabs">
+            <button class="todo-filter-tab todo-filter-tab--active" data-filter="all">All</button>
+            <button class="todo-filter-tab" data-filter="pending">Pending</button>
+            <button class="todo-filter-tab" data-filter="done">Done</button>
+            <button class="todo-filter-tab" data-filter="high">High Priority</button>
+          </div>
+          <ul id="todo-list" class="todo-list"></ul>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="ask-ai-config.js"></script>
+  <script src="auth.js"></script>
+  <script src="database.js"></script>
+  <script src="pdf-parser.js"></script>
+  <script src="session-manager.js"></script>
+  <script>
+  /* ══ AUTH CHECK ══ */
+  if(!Auth.requireLogin('teacher')){throw new Error('Not authorized');}
+  const SESSION=Auth.getSession();
+  document.getElementById('sidebar-user-name').textContent=SESSION.name||'Teacher';
+  document.getElementById('sidebar-user-role').textContent=SESSION.department?SESSION.department+' Faculty':'Faculty';
+  document.getElementById('sidebar-avatar').textContent=(SESSION.name||'T')[0].toUpperCase();
+  document.getElementById('topbar-avatar').textContent=(SESSION.name||'T')[0].toUpperCase();
+
+  /* ══ SESSION MANAGER ══ */
+  SessionManager.init();
+
+  /* ══ HELPERS ══ */
+  function esc(s){const d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
+  function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+  function showToast(msg){let t=document.getElementById('g-toast');if(!t){t=document.createElement('div');t.id='g-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--clr-primary);color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.5);z-index:9999;opacity:0;transition:all .25s;pointer-events:none;';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},2400);}
+  function showSuccess(id){const el=document.getElementById(id);el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),3500);}
+  function showError(elId,textId,msg){const el=document.getElementById(elId);document.getElementById(textId).textContent=msg;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),4000);}
+
+  /* ══ SIDEBAR NAV ══ */
+  document.querySelectorAll('.sidebar__nav-item').forEach(item=>{
+    item.addEventListener('click',e=>{
+      e.preventDefault();
+      document.querySelectorAll('.sidebar__nav-item').forEach(i=>i.classList.remove('sidebar__nav-item--active'));
+      item.classList.add('sidebar__nav-item--active');
+      document.querySelectorAll('.dash-section').forEach(s=>s.classList.remove('dash-section--active'));
+      const sec=document.getElementById('section-'+item.dataset.section);
+      if(sec) sec.classList.add('dash-section--active');
+      document.getElementById('topbar-title').textContent=item.textContent.trim().replace(/^\S+\s*/,'').trim();
+      if(item.dataset.section==='my-uploads') renderMyUploads();
+      if(item.dataset.section==='assignments') renderMyAssignments();
+      if(item.dataset.section==='announcements') renderMyAnnouncements();
+      if(window.innerWidth<=768) document.getElementById('sidebar').classList.remove('is-open');
+    });
+  });
+  document.getElementById('sidebar-toggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('is-open'));
+
+  /* ══ UPLOAD TABS ══ */
+  document.querySelectorAll('.upload-tab[data-utab]').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.upload-tab[data-utab]').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.upload-panel').forEach(p=>p.classList.add('hidden'));
+      document.getElementById('upload-panel-'+tab.dataset.utab)?.classList.remove('hidden');
+    });
+  });
+  document.querySelectorAll('.upload-tab[data-mutab]').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.upload-tab[data-mutab]').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.myupload-panel').forEach(p=>p.classList.add('hidden'));
+      document.getElementById('myupload-panel-'+tab.dataset.mutab)?.classList.remove('hidden');
+    });
+  });
+
+  /* ══ FILE READ HELPER ══ */
+  function readFileAsB64(file){
+    return new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(r.result.split(',')[1]);
+      r.onerror=()=>rej(new Error('File read failed'));
+      r.readAsDataURL(file);
+    });
+  }
+
+  /* ══ DROPZONE HELPER ══ */
+  function setupDropzone(zoneId,inputId,labelId,maxMB=10){
+    const zone=document.getElementById(zoneId);
+    const input=document.getElementById(inputId);
+    const label=document.getElementById(labelId);
+    let selectedFile=null;
+    const update=f=>{selectedFile=f;label.textContent=f.name+' ('+Math.round(f.size/1024)+'KB) ✓';zone.style.borderColor='var(--clr-primary)';};
+    input.addEventListener('change',()=>{if(input.files[0]) update(input.files[0]);});
+    zone.addEventListener('dragover',e=>{e.preventDefault();zone.style.borderColor='var(--clr-primary)';});
+    zone.addEventListener('dragleave',()=>zone.style.borderColor='');
+    zone.addEventListener('drop',e=>{e.preventDefault();zone.style.borderColor='';const f=e.dataTransfer.files[0];if(f&&f.size<=maxMB*1024*1024){input.files=e.dataTransfer.files;update(f);}else if(f) showToast('File too large (max '+maxMB+'MB)');});
+    return ()=>selectedFile;
+  }
+
+  const getPyqFile   = setupDropzone('pyq-dropzone','pyq-file-input','pyq-dropzone-label',10);
+  const getNotesFile = setupDropzone('notes-dropzone','notes-file-input','notes-dropzone-label',10);
+  const getLabFile   = setupDropzone('lab-dropzone','lab-file-input','lab-dropzone-label',10);
+  const getAsgnFile  = setupDropzone('asgn-dropzone','asgn-file-input','asgn-dropzone-label',5);
+
+  // Assignment file preview
+  document.getElementById('asgn-file-input').addEventListener('change',function(){
+    const f=this.files[0];if(!f)return;
+    const prev=document.getElementById('asgn-attach-preview');
+    prev.textContent='📎 '+f.name+' ('+Math.round(f.size/1024)+'KB)';
+    prev.classList.remove('hidden');
+  });
+
+  /* ══ UPLOAD PYQ ══ */
+  document.getElementById('btn-upload-pyq').addEventListener('click',async()=>{
+    const title=document.getElementById('pyq-title').value.trim();
+    const subject=document.getElementById('pyq-subject').value.trim();
+    const branch=document.getElementById('pyq-branch').value;
+    const sem=document.getElementById('pyq-sem').value;
+    const examType=document.getElementById('pyq-exam-type').value;
+    const year=document.getElementById('pyq-year').value;
+    const file=getPyqFile()||document.getElementById('pyq-file-input').files[0];
+    if(!title||!subject||!branch||!sem||!examType||!year) return showError('pyq-upload-error','pyq-upload-error-text','Please fill all required fields.');
+    if(!file) return showError('pyq-upload-error','pyq-upload-error-text','Please select a PDF file.');
+    if(file.size>10*1024*1024) return showError('pyq-upload-error','pyq-upload-error-text','File too large (max 10MB).');
+    const btn=document.getElementById('btn-upload-pyq');
+    btn.textContent='Uploading…';btn.disabled=true;
+    try{
+      const b64=await readFileAsB64(file);
+      let questions=[];
+      try{const parsed=await PDFParser.extract(b64);questions=parsed.questions||[];}catch(e){console.warn('PDF parse failed:',e);}
+      DB.PYQ.add({title,subject,branch,semester:sem,year,examType,examTypeLabel:examType==='end'?'End Semester':'Mid Semester',filename:file.name,uploadedBy:SESSION.name||SESSION.email,fileData:b64,questions,pages:1});
+      showSuccess('pyq-upload-success');
+      ['pyq-title','pyq-subject'].forEach(id=>document.getElementById(id).value='');
+      ['pyq-branch','pyq-sem','pyq-exam-type','pyq-year'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('pyq-dropzone-label').innerHTML='Drag & drop PDF or <label for="pyq-file-input" class="form-link" style="cursor:pointer;">browse</label>';
+      document.getElementById('pyq-dropzone').style.borderColor='';
+    }catch(e){showError('pyq-upload-error','pyq-upload-error-text',e.message);}
+    btn.textContent='Upload Question Paper →';btn.disabled=false;
+  });
+
+  /* ══ UPLOAD NOTES ══ */
+  document.getElementById('btn-upload-notes').addEventListener('click',async()=>{
+    const title=document.getElementById('notes-title').value.trim();
+    const subject=document.getElementById('notes-subject').value.trim();
+    const branch=document.getElementById('notes-branch').value;
+    const sem=document.getElementById('notes-sem').value;
+    const file=getNotesFile()||document.getElementById('notes-file-input').files[0];
+    if(!title||!subject||!branch||!sem) return showError('notes-upload-error','notes-upload-error-text','Please fill all required fields.');
+    if(!file) return showError('notes-upload-error','notes-upload-error-text','Please select a PDF file.');
+    const btn=document.getElementById('btn-upload-notes');btn.textContent='Uploading…';btn.disabled=true;
+    try{
+      const b64=await readFileAsB64(file);
+      DB.Notes.add({title,subject,branch,semester:sem,description:document.getElementById('notes-desc').value.trim(),unit:document.getElementById('notes-unit').value.trim(),filename:file.name,fileData:b64,uploadedBy:SESSION.name||SESSION.email});
+      showSuccess('notes-upload-success');
+      ['notes-title','notes-subject','notes-unit','notes-desc'].forEach(id=>document.getElementById(id).value='');
+      ['notes-branch','notes-sem'].forEach(id=>document.getElementById(id).value='');
+    }catch(e){showError('notes-upload-error','notes-upload-error-text',e.message);}
+    btn.textContent='Upload Notes →';btn.disabled=false;
+  });
+
+  /* ══ UPLOAD LAB MANUAL ══ */
+  document.getElementById('btn-upload-lab').addEventListener('click',async()=>{
+    const title=document.getElementById('lab-title').value.trim();
+    const subject=document.getElementById('lab-subject').value.trim();
+    const branch=document.getElementById('lab-branch').value;
+    const sem=document.getElementById('lab-sem').value;
+    const file=getLabFile()||document.getElementById('lab-file-input').files[0];
+    if(!title||!subject||!branch||!sem) return showError('lab-upload-error','lab-upload-error-text','Please fill all required fields.');
+    if(!file) return showError('lab-upload-error','lab-upload-error-text','Please select a PDF file.');
+    const btn=document.getElementById('btn-upload-lab');btn.textContent='Uploading…';btn.disabled=true;
+    try{
+      const b64=await readFileAsB64(file);
+      DB.LabManuals.add({title,subject,branch,semester:sem,description:document.getElementById('lab-desc').value.trim(),labCount:parseInt(document.getElementById('lab-count').value)||0,filename:file.name,fileData:b64,uploadedBy:SESSION.name||SESSION.email});
+      showSuccess('lab-upload-success');
+      ['lab-title','lab-subject','lab-count','lab-desc'].forEach(id=>document.getElementById(id).value='');
+      ['lab-branch','lab-sem'].forEach(id=>document.getElementById(id).value='');
+    }catch(e){showError('lab-upload-error','lab-upload-error-text',e.message);}
+    btn.textContent='Upload Lab Manual →';btn.disabled=false;
+  });
+
+  /* ══ MY UPLOADS ══ */
+  function renderMyUploads(){renderMyPYQs();renderMyNotes();renderMyLabs();}
+  document.getElementById('btn-refresh-uploads').addEventListener('click',renderMyUploads);
+
+  function renderMyPYQs(){
+    const all=DB.PYQ.getAll().filter(p=>p.uploadedBy===SESSION.name||p.uploadedBy===SESSION.email||p.uploadedBy==='system');
+    const listEl=document.getElementById('my-pyq-list');
+    const emptyEl=document.getElementById('my-pyq-empty');
+    if(!all.length){emptyEl.classList.remove('hidden');listEl.innerHTML='';return;}
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML=all.map(p=>`
+      <div class="my-item-card">
+        <div class="my-item-card__header">
+          <div class="my-item-card__title">📄 ${esc(p.title)}</div>
+          <button class="btn btn--danger btn--xs" onclick="deleteItem('pyq','${esc(p.id)}')">🗑 Delete</button>
+        </div>
+        <div class="my-item-card__meta">
+          <span class="pyq-card__tag pyq-card__tag--branch" style="font-size:10px;padding:2px 7px;">${esc(p.branch.toUpperCase())}</span>
+          Sem ${esc(p.semester)} • ${esc(p.subject)} • ${esc(p.examTypeLabel)} • ${esc(p.year)} • ${esc(p.questions?.length||0)} questions
+        </div>
+      </div>`).join('');
+  }
+
+  function renderMyNotes(){
+    const all=DB.Notes.getAll().filter(n=>n.uploadedBy===SESSION.name||n.uploadedBy===SESSION.email);
+    const listEl=document.getElementById('my-notes-list');
+    const emptyEl=document.getElementById('my-notes-empty');
+    if(!all.length){emptyEl.classList.remove('hidden');listEl.innerHTML='';return;}
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML=all.map(n=>`
+      <div class="my-item-card">
+        <div class="my-item-card__header">
+          <div class="my-item-card__title">📒 ${esc(n.title)}</div>
+          <button class="btn btn--danger btn--xs" onclick="deleteItem('note','${esc(n.id)}')">🗑 Delete</button>
+        </div>
+        <div class="my-item-card__meta">
+          <span class="pyq-card__tag pyq-card__tag--branch" style="font-size:10px;padding:2px 7px;">${esc(n.branch.toUpperCase())}</span>
+          Sem ${esc(n.semester)} • ${esc(n.subject)} • Uploaded: ${esc(n.uploadedAt||'')}
+        </div>
+      </div>`).join('');
+  }
+
+  function renderMyLabs(){
+    const all=DB.LabManuals.getAll().filter(l=>l.uploadedBy===SESSION.name||l.uploadedBy===SESSION.email);
+    const listEl=document.getElementById('my-lab-list');
+    const emptyEl=document.getElementById('my-lab-empty');
+    if(!all.length){emptyEl.classList.remove('hidden');listEl.innerHTML='';return;}
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML=all.map(l=>`
+      <div class="my-item-card">
+        <div class="my-item-card__header">
+          <div class="my-item-card__title">🔬 ${esc(l.title)}</div>
+          <button class="btn btn--danger btn--xs" onclick="deleteItem('lab','${esc(l.id)}')">🗑 Delete</button>
+        </div>
+        <div class="my-item-card__meta">
+          <span class="pyq-card__tag pyq-card__tag--branch" style="font-size:10px;padding:2px 7px;">${esc(l.branch.toUpperCase())}</span>
+          Sem ${esc(l.semester)} • ${esc(l.subject)} • ${esc(l.labCount||0)} labs • Uploaded: ${esc(l.uploadedAt||'')}
+        </div>
+      </div>`).join('');
+  }
+
+  window.deleteItem=function(type,id){
+    if(!confirm('Delete this item? This cannot be undone.'))return;
+    if(type==='pyq') DB.PYQ.remove(id);
+    else if(type==='note') DB.Notes.remove(id);
+    else if(type==='lab') DB.LabManuals.remove(id);
+    renderMyUploads();showToast('Item deleted');
+  };
+
+  /* ══ ASSIGNMENTS ══ */
+  document.getElementById('btn-post-asgn').addEventListener('click',async()=>{
+    const title=document.getElementById('asgn-title').value.trim();
+    const subject=document.getElementById('asgn-subject').value.trim();
+    const branch=document.getElementById('asgn-branch').value;
+    const sem=document.getElementById('asgn-sem').value;
+    const due=document.getElementById('asgn-due').value;
+    if(!title||!subject||!branch||!sem||!due) return showError('asgn-post-error','asgn-post-error-text','Please fill all required fields including due date.');
+    const btn=document.getElementById('btn-post-asgn');btn.textContent='Posting…';btn.disabled=true;
+    try{
+      let attachmentData=null,attachmentType=null,attachmentName=null;
+      const asgnFile=document.getElementById('asgn-file-input').files[0];
+      if(asgnFile&&asgnFile.size<=5*1024*1024){
+        attachmentData=await readFileAsB64(asgnFile);
+        attachmentType=asgnFile.type;attachmentName=asgnFile.name;
+      }
+      DB.Assignments.add({title,subject,branch,semester:sem,dueDate:due,maxMarks:parseInt(document.getElementById('asgn-marks').value)||null,description:document.getElementById('asgn-desc').value.trim(),uploadedBy:SESSION.email,createdByName:SESSION.name,attachmentData,attachmentType,attachmentName});
+      showSuccess('asgn-post-success');
+      ['asgn-title','asgn-subject','asgn-due','asgn-marks','asgn-desc'].forEach(id=>document.getElementById(id).value='');
+      ['asgn-branch','asgn-sem'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('asgn-file-input').value='';
+      document.getElementById('asgn-attach-preview').classList.add('hidden');
+      renderMyAssignments();
+    }catch(e){showError('asgn-post-error','asgn-post-error-text',e.message);}
+    btn.textContent='Post Assignment →';btn.disabled=false;
+  });
+
+  function renderMyAssignments(){
+    const all=DB.Assignments.getAll().filter(a=>a.uploadedBy===SESSION.email||a.createdByName===SESSION.name);
+    const listEl=document.getElementById('my-asgn-list');
+    const emptyEl=document.getElementById('my-asgn-empty');
+    if(!all.length){emptyEl.classList.remove('hidden');listEl.innerHTML='';return;}
+    emptyEl.classList.add('hidden');
+    const now=new Date();
+    listEl.innerHTML=all.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).map(a=>{
+      const isExpired=a.dueDate&&new Date(a.dueDate)<now;
+      const due=a.dueDate?new Date(a.dueDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'No due date';
+      return `<div class="my-item-card">
+        <div class="my-item-card__header">
+          <div>
+            <div class="my-item-card__title">📝 ${esc(a.title)}</div>
+            <span class="status-tag ${isExpired?'status-tag--expired':'status-tag--active'}">${isExpired?'Expired':'Active'}</span>
+          </div>
+          <button class="btn btn--danger btn--xs" onclick="deleteAsgn('${esc(a.id)}')">🗑 Delete</button>
+        </div>
+        <div class="my-item-card__meta">
+          <span class="pyq-card__tag pyq-card__tag--branch" style="font-size:10px;padding:2px 7px;">${esc(a.branch.toUpperCase())}</span>
+          Sem ${esc(a.semester)} • ${esc(a.subject)} • Due: ${esc(due)}
+          ${a.maxMarks?' • '+esc(String(a.maxMarks))+' marks':''}
+          ${a.attachmentData?' • 📎 Attachment':''}
+        </div>
+      </div>`;}).join('');
+  }
+
+  window.deleteAsgn=function(id){
+    if(!confirm('Delete this assignment?'))return;
+    DB.Assignments.remove(id);renderMyAssignments();showToast('Assignment deleted');
+  };
+
+  /* ══ ANNOUNCEMENTS ══ */
+  document.getElementById('btn-post-ann').addEventListener('click',()=>{
+    const title=document.getElementById('ann-title').value.trim();
+    if(!title){showToast('Please enter a title');return;}
+    DB.Announcements.add({title,body:document.getElementById('ann-body').value.trim(),type:document.getElementById('ann-type').value,branch:document.getElementById('ann-branch').value,postedBy:SESSION.name||'Teacher',expiresAt:document.getElementById('ann-expires').value});
+    showSuccess('ann-post-success');
+    ['ann-title','ann-body','ann-expires'].forEach(id=>document.getElementById(id).value='');
+    ['ann-type','ann-branch'].forEach(id=>document.getElementById(id).value=id==='ann-branch'?'all':'general');
+    renderMyAnnouncements();
+  });
+
+  function renderMyAnnouncements(){
+    const all=DB.Announcements.getAll().filter(a=>a.postedBy===SESSION.name||a.postedBy===SESSION.email);
+    const listEl=document.getElementById('my-ann-list');
+    const emptyEl=document.getElementById('my-ann-empty');
+    if(!all.length){emptyEl.classList.remove('hidden');listEl.innerHTML='';return;}
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML=all.map(a=>`
+      <div class="my-item-card">
+        <div class="my-item-card__header">
+          <div class="my-item-card__title">📢 ${esc(a.title)}</div>
+          <button class="btn btn--danger btn--xs" onclick="deleteAnn('${esc(a.id)}')">🗑 Delete</button>
+        </div>
+        <div class="my-item-card__meta">Type: ${esc(a.type)} • Branch: ${esc(a.branch==='all'?'All':a.branch.toUpperCase())}
+        ${a.expiresAt?' • Expires: '+new Date(a.expiresAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):''}
+        </div>
+        ${a.body?`<p style="font-size:12px;color:#aaa;margin-top:6px;">${esc(a.body.slice(0,80))}${a.body.length>80?'…':''}</p>`:''}
+      </div>`).join('');
+  }
+  window.deleteAnn=function(id){if(!confirm('Delete this announcement?'))return;DB.Announcements.remove(id);renderMyAnnouncements();showToast('Announcement deleted');};
+
+  /* ══ TO-DO ══ */
+  const TODO_KEY='nitkkr_teacher_todos_'+SESSION.email;
+  function getTodos(){try{return JSON.parse(localStorage.getItem(TODO_KEY)||'[]');}catch{return[];}}
+  function saveTodos(arr){localStorage.setItem(TODO_KEY,JSON.stringify(arr));}
+  function renderTodos(){
+    const todos=getTodos();
+    const listEl=document.getElementById('todo-list');
+    listEl.innerHTML=todos.map(t=>`<li class="todo-item todo-item--${esc(t.priority)} ${t.done?'todo-item--done':''}" data-id="${esc(t.id)}"><input type="checkbox" class="todo-item__check" ${t.done?'checked':''} /><div class="todo-item__info"><span class="todo-item__text">${esc(t.text)}</span><span class="todo-item__meta">${t.due?'Due: '+t.due+' • ':''}${cap(t.priority)} Priority</span></div><span class="todo-item__priority todo-item__priority--${esc(t.priority)}">${cap(t.priority)}</span><button class="todo-item__delete btn btn--ghost btn--sm" data-id="${esc(t.id)}">🗑</button></li>`).join('');
+    listEl.querySelectorAll('.todo-item__check').forEach(chk=>{chk.addEventListener('change',()=>{const id=chk.closest('.todo-item').dataset.id;const todos=getTodos();const i=todos.findIndex(t=>t.id===id);if(i>=0){todos[i].done=chk.checked;saveTodos(todos);}renderTodos();});});
+    listEl.querySelectorAll('.todo-item__delete').forEach(btn=>{btn.addEventListener('click',()=>{saveTodos(getTodos().filter(t=>t.id!==btn.dataset.id));renderTodos();});});
+  }
+  document.getElementById('todo-add-btn').addEventListener('click',()=>{const text=document.getElementById('todo-input').value.trim();if(!text)return;const todos=getTodos();todos.unshift({id:'todo_'+Date.now(),text,priority:document.getElementById('todo-priority').value,due:document.getElementById('todo-due').value,done:false});saveTodos(todos);document.getElementById('todo-input').value='';document.getElementById('todo-due').value='';renderTodos();});
+  document.getElementById('todo-input').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('todo-add-btn').click();});
+  document.querySelectorAll('.todo-filter-tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.todo-filter-tab').forEach(t=>t.classList.remove('todo-filter-tab--active'));tab.classList.add('todo-filter-tab--active');const f=tab.dataset.filter;document.querySelectorAll('.todo-item').forEach(item=>{item.style.display=f==='all'?'':f==='done'?(item.classList.contains('todo-item--done')?'':'none'):f==='pending'?(!item.classList.contains('todo-item--done')?'':'none'):f==='high'?(item.classList.contains('todo-item--high')?'':'none'):'';});});});
+  renderTodos();
+
+  /* ══ AI ASSISTANT — RAG Backend ══ */
+  document.getElementById('ai-chat-send-btn').addEventListener('click', genChat);
+  document.getElementById('ai-chat-input').addEventListener('keydown', e => { if (e.key === 'Enter') genChat(); });
+  document.getElementById('btn-clear-teacher-chat').addEventListener('click', () => {
+    document.getElementById('ai-chat-messages').innerHTML = `<div class="chat-msg chat-msg--ai"><span class="chat-msg__avatar">⬡</span><div class="chat-msg__bubble">Chat cleared! Kya poochna hai?</div></div>`;
+  });
+
+  window.teacherSuggest = function(el) {
+    const txt = el.textContent.replace(/^[^\s]+\s/, '').trim();
+    document.getElementById('ai-chat-input').value = txt;
+    genChat();
+  };
+
+  function fmtAI(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code style="background:rgba(108,99,255,0.15);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px">$1</code>').replace(/\n/g,'<br/>');}
+
+  async function genChat() {
+
+    const inp = document.getElementById('ai-chat-input');
+    const text = inp.value.trim(); if (!text) return;
+    const msgs = document.getElementById('ai-chat-messages');
+    msgs.insertAdjacentHTML('beforeend', `<div class="chat-msg chat-msg--user"><span class="chat-msg__avatar">👤</span><div class="chat-msg__bubble">${esc(text)}</div></div>`);
+    inp.value = '';
+    const aiDiv = document.createElement('div'); aiDiv.className = 'chat-msg chat-msg--ai';
+    aiDiv.innerHTML = `<span class="chat-msg__avatar">⬡</span><div class="chat-msg__bubble"><span style="color:#666;font-style:italic;">Searching institute documents…</span></div>`;
+    msgs.appendChild(aiDiv); msgs.scrollTop = msgs.scrollHeight;
+    try {
+      // Try RAG backend first
+      const res = await API.chat(text);
+      const answer = res.answer || 'No response.';
+      const sourceType = res.source_type || 'general';
+      const sourceLabels = { result: '📊 Result DB', notification: '📋 Policy Docs', announcement: '📢 Announcements', general: '🤖 AI' };
+      const sourceBadge = `<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:rgba(108,99,255,0.12);color:#a89cff;border:1px solid rgba(108,99,255,0.25);margin-bottom:6px;">${sourceLabels[sourceType] || '🤖 AI'}</span>`;
+      aiDiv.querySelector('.chat-msg__bubble').innerHTML = sourceBadge + '<br/>' + fmtAI(answer);
+    } catch (e) {
+      // Fallback to Groq if backend unavailable
+      try {
+        const cfg = typeof AskAIConfig !== 'undefined' ? AskAIConfig : {};
+        if (cfg.GROQ_API_KEY) {
+          const r = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.GROQ_API_KEY }, body: JSON.stringify({ model: cfg.GROQ_MODEL || 'llama-3.3-70b-versatile', max_tokens: 1000, temperature: 0.7, messages: [{ role: 'system', content: 'You are an expert NIT Kurukshetra academic assistant for faculty. Help teachers create questions, explain concepts, generate assignment ideas, and assist with academic content. Be professional and thorough.' }, { role: 'user', content: text }] }) });
+          const d = await r.json();
+          const fallbackBadge = '<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.25);margin-bottom:6px;">⚡ Groq Fallback</span>';
+          aiDiv.querySelector('.chat-msg__bubble').innerHTML = fallbackBadge + '<br/>' + fmtAI(d?.choices?.[0]?.message?.content || 'No response.');
+        } else {
+          aiDiv.querySelector('.chat-msg__bubble').innerHTML = `<span style="color:#f87171;">⚠️ Backend offline: ${esc(e.message)}</span>`;
+        }
+      } catch (e2) {
+        aiDiv.querySelector('.chat-msg__bubble').innerHTML = `<span style="color:#f87171;">⚠️ Error: ${esc(e2.message)}</span>`;
+      }
+    }
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  </script>
+</body>
+</html>

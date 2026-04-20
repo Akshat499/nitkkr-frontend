@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signup — NIT KKR Search</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    .role-tabs { display:flex; gap:0; background:var(--clr-bg-2); border:1px solid var(--clr-border); border-radius:var(--radius-md); padding:4px; margin-bottom:28px; }
+    .role-tab  { flex:1; padding:9px 12px; border-radius:calc(var(--radius-md) - 2px); font-size:13px; font-weight:600; color:var(--clr-text-muted); transition:all 0.2s; cursor:pointer; text-align:center; }
+    .role-tab.active { background:var(--clr-primary); color:#fff; box-shadow:var(--shadow-primary); }
+
+    .method-toggle { display:flex; align-items:center; gap:8px; margin-bottom:20px; font-size:13px; color:var(--clr-text-muted); }
+    .method-toggle__btn { padding:5px 14px; border-radius:var(--radius-full); font-size:12px; font-weight:600; border:1px solid var(--clr-border); color:var(--clr-text-muted); transition:all 0.2s; cursor:pointer; background:none; }
+    .method-toggle__btn.active { background:rgba(108,99,255,0.15); border-color:var(--clr-primary); color:var(--clr-primary); }
+
+    .otp-inputs { display:flex; gap:10px; justify-content:center; margin:8px 0; }
+    .otp-input  { width:48px; height:52px; text-align:center; font-size:20px; font-weight:700; font-family:var(--font-mono); background:var(--clr-bg-card); border:1px solid var(--clr-border); border-radius:var(--radius-md); color:var(--clr-text); outline:none; transition:border-color 0.2s, box-shadow 0.2s; }
+    .otp-input:focus { border-color:var(--clr-primary); box-shadow:0 0 0 3px var(--clr-primary-glow); }
+    .otp-input.filled { border-color:rgba(108,99,255,0.5); background:rgba(108,99,255,0.08); }
+    .otp-timer { font-size:12px; color:var(--clr-text-muted); text-align:center; margin-top:6px; }
+    .otp-timer span { color:var(--clr-primary); font-weight:600; }
+
+    .step-indicator { display:flex; align-items:center; gap:0; margin-bottom:20px; }
+    .step-dot { width:28px; height:28px; border-radius:50%; background:var(--clr-bg-card); border:2px solid var(--clr-border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--clr-text-muted); transition:all 0.3s; flex-shrink:0; }
+    .step-dot.active { background:var(--clr-primary); border-color:var(--clr-primary); color:#fff; box-shadow:var(--shadow-primary); }
+    .step-dot.done   { background:var(--clr-success); border-color:var(--clr-success); color:#fff; }
+    .step-line { flex:1; height:2px; background:var(--clr-border); transition:background 0.3s; }
+    .step-line.done { background:var(--clr-success); }
+
+    .auth-alert { display:none; align-items:flex-start; gap:10px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:var(--radius-md); padding:12px 14px; font-size:13px; color:#fca5a5; }
+    .auth-alert.show    { display:flex; }
+    .auth-alert.success { background:rgba(34,197,94,0.1); border-color:rgba(34,197,94,0.3); color:#86efac; }
+    .auth-alert.warn    { background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.3); color:#fde68a; }
+
+    .spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .pw-strength { display:flex; gap:4px; margin-top:6px; }
+    .pw-strength__bar { flex:1; height:3px; background:var(--clr-border); border-radius:2px; transition:background 0.3s; }
+    .pw-strength__bar.weak   { background:#ef4444; }
+    .pw-strength__bar.medium { background:#f59e0b; }
+    .pw-strength__bar.strong { background:#22c55e; }
+
+    .phone-prefix { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:13px; color:var(--clr-text-muted); font-family:var(--font-mono); pointer-events:none; }
+    .phone-input  { padding-left:46px !important; }
+
+    .success-screen { display:none; flex-direction:column; align-items:center; gap:16px; padding:40px 24px; text-align:center; }
+    .success-screen.show { display:flex; }
+    .success-screen__icon  { font-size:60px; animation:popIn 0.5s ease; }
+    .success-screen__title { font-size:20px; font-weight:800; color:#fff; }
+    .success-screen__msg   { font-size:14px; color:var(--clr-text-muted); max-width:320px; line-height:1.7; }
+    @keyframes popIn { 0%{transform:scale(0.5);opacity:0} 80%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+
+    .terms-check { display:flex; align-items:flex-start; gap:10px; font-size:12px; color:var(--clr-text-muted); }
+    .terms-check input { margin-top:2px; accent-color:var(--clr-primary); }
+    .terms-check a { color:var(--clr-primary); }
+
+    .divider { display:flex; align-items:center; gap:10px; margin:4px 0; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--clr-border); }
+    .divider span { font-size:12px; color:var(--clr-text-muted); }
+
+    .btn-google {
+      width:100%; padding:12px; border-radius:var(--radius-md);
+      border:1px solid var(--clr-border); background:var(--clr-bg-card);
+      color:var(--clr-text); font-size:14px; font-weight:600;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      cursor:pointer; transition:all 0.2s; font-family:var(--font-main);
+    }
+    .btn-google:hover { border-color:#4285f4; background:rgba(66,133,244,0.08); }
+  </style>
+</head>
+<body class="page-login">
+
+  <header class="navbar navbar--transparent">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__logo">
+        <span class="navbar__logo-icon">⬡</span>
+        <span class="navbar__logo-text">NIT<span class="navbar__logo-accent">KKR</span></span>
+      </a>
+      <div class="navbar__auth">
+        <a href="login.html" class="btn btn--ghost btn--sm">Already registered? Login →</a>
+      </div>
+    </div>
+  </header>
+
+  <div id="recaptcha-container"></div>
+
+  <main class="login-page">
+    <div class="login-page__bg-orb login-page__bg-orb--1"></div>
+    <div class="login-page__bg-orb login-page__bg-orb--2"></div>
+
+    <div class="login-container">
+
+      <!-- Left panel -->
+      <div class="login-info-panel">
+        <div class="login-info__logo">⬡</div>
+        <h2 class="login-info__heading">Register on NIT KKR Search</h2>
+        <p class="login-info__subtext">Teacher ya Student — apni role choose karo aur account banao.</p>
+        <div class="login-info__rules">
+          <div class="login-info__rule"><span>📧</span><span>Teachers ko <strong>@nitkkr.ac.in</strong> email chahiye</span></div>
+          <div class="login-info__rule"><span>✅</span><span>Email verify hogi — inbox check karna</span></div>
+          <div class="login-info__rule"><span>⏳</span><span>Teachers ko Admin approval bhi chahiye</span></div>
+          <div class="login-info__rule"><span>🔵</span><span>Google se bhi register ho sakte ho</span></div>
+        </div>
+      </div>
+
+      <!-- Right Form -->
+      <div class="login-form-panel">
+
+        <div id="signup-form-area">
+          <div class="role-tabs">
+            <div class="role-tab active" id="tab-teacher"    onclick="switchRole('teacher')">📚 Teacher</div>
+            <div class="role-tab"        id="tab-student-su" onclick="switchRole('student')">🎓 Student</div>
+          </div>
+
+          <div id="alert-signup" class="auth-alert"></div>
+
+          <!-- ── TEACHER SIGNUP ── -->
+          <div id="panel-teacher">
+            <div class="login-form-panel__header">
+              <h3 class="auth-form__title">Teacher Registration</h3>
+              <p class="auth-form__subtitle">@nitkkr.ac.in required • Admin approval needed</p>
+            </div>
+            <div class="auth-form auth-form--active" style="gap:16px;">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="t-name" class="form-input" placeholder="Prof. Ramesh Sharma" />
+                <span id="t-name-err" class="form-error"></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">NIT KKR Email</label>
+                <input type="email" id="t-email" class="form-input" placeholder="faculty@nitkkr.ac.in" />
+                <span id="t-email-err" class="form-error"></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Department</label>
+                <select id="t-dept" class="form-input">
+                  <option value="">Select Department</option>
+                  <option value="CSE">Computer Science & Engineering</option>
+                  <option value="ECE">Electronics & Communication</option>
+                  <option value="EE">Electrical Engineering</option>
+                  <option value="ME">Mechanical Engineering</option>
+                  <option value="CE">Civil Engineering</option>
+                  <option value="IT">Information Technology</option>
+                  <option value="CHE">Chemical Engineering</option>
+                  <option value="MCA">MCA</option>
+                  <option value="MBA">MBA</option>
+                  <option value="PHY">Physics</option>
+                  <option value="MATH">Mathematics</option>
+                </select>
+                <span id="t-dept-err" class="form-error"></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="form-input-wrapper">
+                  <input type="password" id="t-password" class="form-input" placeholder="Min. 6 characters" oninput="checkStrength('t-password','t-strength')" />
+                  <button type="button" onclick="togglePw('t-password',this)" class="form-input-toggle">👁</button>
+                </div>
+                <div class="pw-strength" id="t-strength">
+                  <div class="pw-strength__bar"></div>
+                  <div class="pw-strength__bar"></div>
+                  <div class="pw-strength__bar"></div>
+                </div>
+                <span id="t-pw-err" class="form-error"></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" id="t-confirm-pw" class="form-input" placeholder="Repeat password" />
+                <span id="t-cpw-err" class="form-error"></span>
+              </div>
+              <div class="terms-check">
+                <input type="checkbox" id="t-terms" />
+                <label for="t-terms">I agree to the <a href="terms.html" target="_blank">Terms</a> & <a href="privacy.html" target="_blank">Privacy Policy</a></label>
+              </div>
+              <button id="btn-teacher-signup" class="btn btn--primary btn--full btn--lg" onclick="teacherSignup()">Register as Teacher →</button>
+
+              <div class="divider"><span>ya</span></div>
+              <button class="btn-google" onclick="googleSignup('teacher')">
+                <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                Register with Google
+              </button>
+              <p style="font-size:13px; color:var(--clr-text-muted); text-align:center;">
+                Already registered? <a href="login.html" class="form-link">Login karo →</a>
+              </p>
+            </div>
+          </div>
+
+          <!-- ── STUDENT SIGNUP ── -->
+          <div id="panel-student-su" style="display:none;">
+            <div class="login-form-panel__header">
+              <h3 class="auth-form__title">Student Registration</h3>
+              <p class="auth-form__subtitle">Email, Phone OTP, ya Google — choose karo</p>
+            </div>
+
+            <div class="method-toggle">
+              <span>Register via:</span>
+              <button class="method-toggle__btn active" id="btn-su-email" onclick="setStudentMethod('email')">📧 Email</button>
+              <button class="method-toggle__btn"        id="btn-su-phone" onclick="setStudentMethod('phone')">📱 Phone OTP</button>
+            </div>
+
+            <!-- Student Email Signup -->
+            <div id="su-email-panel">
+              <div class="auth-form auth-form--active" style="gap:16px;">
+                <div class="form-group">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" id="s-name" class="form-input" placeholder="Rahul Kumar" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input type="email" id="s-email" class="form-input" placeholder="your@email.com" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Password</label>
+                  <div class="form-input-wrapper">
+                    <input type="password" id="s-password" class="form-input" placeholder="Min. 6 characters" oninput="checkStrength('s-password','s-strength')" />
+                    <button type="button" onclick="togglePw('s-password',this)" class="form-input-toggle">👁</button>
+                  </div>
+                  <div class="pw-strength" id="s-strength">
+                    <div class="pw-strength__bar"></div>
+                    <div class="pw-strength__bar"></div>
+                    <div class="pw-strength__bar"></div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirm Password</label>
+                  <input type="password" id="s-confirm-pw" class="form-input" placeholder="Repeat password" />
+                </div>
+                <div class="terms-check">
+                  <input type="checkbox" id="s-terms" />
+                  <label for="s-terms">I agree to the <a href="terms.html" target="_blank">Terms</a> & <a href="privacy.html" target="_blank">Privacy Policy</a></label>
+                </div>
+                <button class="btn btn--primary btn--full btn--lg" onclick="studentEmailSignup()">Create Account →</button>
+
+                <div class="divider"><span>ya</span></div>
+                <button class="btn-google" onclick="googleSignup('student')">
+                  <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                  Register with Google
+                </button>
+                <p style="font-size:13px; color:var(--clr-text-muted); text-align:center;">
+                  Already registered? <a href="login.html?role=student" class="form-link">Login karo →</a>
+                </p>
+              </div>
+            </div>
+
+            <!-- Student Phone Signup -->
+            <div id="su-phone-panel" style="display:none;">
+              <div class="step-indicator">
+                <div class="step-dot active" id="su-step1-dot">1</div>
+                <div class="step-line" id="su-step-line"></div>
+                <div class="step-dot" id="su-step2-dot">2</div>
+              </div>
+              <div id="su-phone-step1">
+                <div class="auth-form auth-form--active" style="gap:16px;">
+                  <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="sp-name" class="form-input" placeholder="Rahul Kumar" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <div class="form-input-wrapper">
+                      <span class="phone-prefix">+91</span>
+                      <input type="tel" id="sp-phone" class="form-input phone-input" placeholder="9876543210" maxlength="10" />
+                    </div>
+                  </div>
+                  <div class="terms-check">
+                    <input type="checkbox" id="sp-terms" />
+                    <label for="sp-terms">I agree to the <a href="terms.html" target="_blank">Terms</a> & <a href="privacy.html" target="_blank">Privacy Policy</a></label>
+                  </div>
+                  <button id="btn-sp-send" class="btn btn--primary btn--full btn--lg" onclick="sendSignupOTP()">Send OTP →</button>
+                </div>
+              </div>
+              <div id="su-phone-step2" style="display:none;">
+                <div class="auth-form auth-form--active" style="gap:16px;">
+                  <div class="form-group">
+                    <label class="form-label" style="text-align:center; display:block;">6-digit OTP enter karo</label>
+                    <div class="otp-inputs" id="su-otp-inputs">
+                      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" />
+                      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" />
+                      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" />
+                      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" />
+                      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" />
+                      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" />
+                    </div>
+                    <div class="otp-timer">Valid: <span id="su-timer">02:00</span></div>
+                  </div>
+                  <button class="btn btn--primary btn--full btn--lg" onclick="verifySignupOTP()">Verify & Register →</button>
+                  <button class="btn btn--ghost btn--full" onclick="backToSignupPhone()">← Phone dobara daalo</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success Screen -->
+        <div class="success-screen" id="success-screen">
+          <div class="success-screen__icon" id="success-icon">✅</div>
+          <div class="success-screen__title" id="success-title">Registration Successful!</div>
+          <div class="success-screen__msg"   id="success-msg">Account ban gaya!</div>
+          <a href="login.html" class="btn btn--primary btn--lg" style="margin-top:8px;">Login Karo →</a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="firebase-auth.js"></script>
+  <script>
+    let suTimerInterval;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('role') === 'student') switchRole('student');
+
+    function switchRole(role) {
+      document.getElementById('tab-teacher').classList.toggle('active',    role === 'teacher');
+      document.getElementById('tab-student-su').classList.toggle('active', role === 'student');
+      document.getElementById('panel-teacher').style.display    = role === 'teacher' ? 'block' : 'none';
+      document.getElementById('panel-student-su').style.display = role === 'student' ? 'block' : 'none';
+      hideAlert();
+    }
+
+    function setStudentMethod(method) {
+      document.getElementById('btn-su-email').classList.toggle('active', method === 'email');
+      document.getElementById('btn-su-phone').classList.toggle('active', method === 'phone');
+      document.getElementById('su-email-panel').style.display = method === 'email' ? 'block' : 'none';
+      document.getElementById('su-phone-panel').style.display = method === 'phone' ? 'block' : 'none';
+    }
+
+    function togglePw(id, btn) {
+      const inp = document.getElementById(id);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+    }
+
+    function showAlert(msg, type = 'error') {
+      const el = document.getElementById('alert-signup');
+      const icons = { error:'⚠️ ', success:'✅ ', warn:'⏳ ' };
+      el.textContent = icons[type] + msg;
+      el.className = 'auth-alert show' + (type !== 'error' ? ' ' + type : '');
+    }
+    function hideAlert() { document.getElementById('alert-signup').className = 'auth-alert'; }
+
+    function checkStrength(inputId, barId) {
+      const val  = document.getElementById(inputId).value;
+      const bars = document.querySelectorAll('#' + barId + ' .pw-strength__bar');
+      let score  = 0;
+      if (val.length >= 6) score++;
+      if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+      if (val.length >= 10 && /[^A-Za-z0-9]/.test(val)) score++;
+      const cls = ['','weak','medium','strong'];
+      bars.forEach((b, i) => { b.className = 'pw-strength__bar' + (i < score ? ' ' + cls[score] : ''); });
+    }
+
+    function showSuccess(icon, title, msg) {
+      document.getElementById('signup-form-area').style.display = 'none';
+      document.getElementById('success-icon').textContent  = icon;
+      document.getElementById('success-title').textContent = title;
+      document.getElementById('success-msg').textContent   = msg;
+      document.getElementById('success-screen').classList.add('show');
+    }
+
+    // ── GOOGLE SIGNUP ────────────────────────────────
+    async function googleSignup(role) {
+      const result = await FirebaseAuth.signInWithGoogle(role);
+      if (result.success) {
+        if (role === 'teacher' && result.isNew) {
+          showSuccess('⏳', 'Google se Register Ho Gaya!', 'Admin approval ke baad login kar paoge. Tab tak wait karo.');
+        } else {
+          const map = { admin:'dashboard-admin.html', teacher:'dashboard-teacher.html', student:'dashboard-student.html' };
+          window.location.href = map[result.role] || 'dashboard-student.html';
+        }
+      } else {
+        showAlert(result.message);
+      }
+    }
+
+    // ── TEACHER EMAIL SIGNUP ─────────────────────────
+    async function teacherSignup() {
+      hideAlert();
+      const name  = document.getElementById('t-name').value.trim();
+      const email = document.getElementById('t-email').value.trim();
+      const dept  = document.getElementById('t-dept').value;
+      const pw    = document.getElementById('t-password').value;
+      const cpw   = document.getElementById('t-confirm-pw').value;
+      const terms = document.getElementById('t-terms').checked;
+
+      ['t-name-err','t-email-err','t-dept-err','t-pw-err','t-cpw-err'].forEach(id => { document.getElementById(id).textContent = ''; });
+
+      let ok = true;
+      if (!name)  { document.getElementById('t-name-err').textContent  = 'Naam daalo.'; ok = false; }
+      if (!email) { document.getElementById('t-email-err').textContent = 'Email daalo.'; ok = false; }
+      else if (!email.endsWith('@nitkkr.ac.in')) { document.getElementById('t-email-err').textContent = 'Sirf @nitkkr.ac.in allowed hai.'; ok = false; }
+      if (!dept)  { document.getElementById('t-dept-err').textContent  = 'Department select karo.'; ok = false; }
+      if (pw.length < 6) { document.getElementById('t-pw-err').textContent  = 'Password min 6 characters.'; ok = false; }
+      if (pw !== cpw)    { document.getElementById('t-cpw-err').textContent = 'Passwords match nahi kar rahe.'; ok = false; }
+      if (!terms) { showAlert('Terms & Privacy Policy accept karo.'); ok = false; }
+      if (!ok) return;
+
+      const btn = document.getElementById('btn-teacher-signup');
+      btn.innerHTML = '<span class="spinner"></span> Registering...';
+      btn.disabled  = true;
+
+      const result = await FirebaseAuth.signupWithEmail(email, pw, name, 'teacher', dept);
+      btn.innerHTML = 'Register as Teacher →';
+      btn.disabled  = false;
+
+      if (result.success) {
+        showSuccess('📧', 'Check Your Email!', `Teri email ${email} pe verification link bheja gaya hai. Verify karo, phir admin approval ke baad login kar paoge.`);
+      } else {
+        showAlert(result.message);
+      }
+    }
+
+    // ── STUDENT EMAIL SIGNUP ─────────────────────────
+    async function studentEmailSignup() {
+      hideAlert();
+      const name  = document.getElementById('s-name').value.trim();
+      const email = document.getElementById('s-email').value.trim();
+      const pw    = document.getElementById('s-password').value;
+      const cpw   = document.getElementById('s-confirm-pw').value;
+      const terms = document.getElementById('s-terms').checked;
+
+      if (!name)         { showAlert('Naam daalo.'); return; }
+      if (!email)        { showAlert('Email daalo.'); return; }
+      if (pw.length < 6) { showAlert('Password min 6 characters ka hona chahiye.'); return; }
+      if (pw !== cpw)    { showAlert('Passwords match nahi kar rahe.'); return; }
+      if (!terms)        { showAlert('Terms & Privacy Policy accept karo.'); return; }
+
+      const result = await FirebaseAuth.signupWithEmail(email, pw, name, 'student', '');
+      if (result.success) {
+        showSuccess('📧', 'Verify Your Email!', `Verification link bheja gaya hai ${email} pe. Link pe click karo aur phir login karo!`);
+      } else {
+        showAlert(result.message);
+      }
+    }
+
+    // ── STUDENT PHONE SIGNUP ─────────────────────────
+    async function sendSignupOTP() {
+      hideAlert();
+      const name  = document.getElementById('sp-name').value.trim();
+      const phone = document.getElementById('sp-phone').value.trim();
+      const terms = document.getElementById('sp-terms').checked;
+
+      if (!name)  { showAlert('Naam daalo.'); return; }
+      if (!phone || phone.length !== 10) { showAlert('10 digit phone number daalo.'); return; }
+      if (!terms) { showAlert('Terms accept karo.'); return; }
+
+      const btn = document.getElementById('btn-sp-send');
+      btn.innerHTML = '<span class="spinner"></span> OTP bhej raha hai...';
+      btn.disabled  = true;
+
+      const result = await FirebaseAuth.sendPhoneOTP(phone, 'recaptcha-container');
+      if (result.success) {
+        document.getElementById('su-phone-step1').style.display = 'none';
+        document.getElementById('su-phone-step2').style.display = 'block';
+        document.getElementById('su-step1-dot').className = 'step-dot done';
+        document.getElementById('su-step-line').className = 'step-line done';
+        document.getElementById('su-step2-dot').className = 'step-dot active';
+        showAlert('OTP bheja gaya! +91' + phone, 'success');
+        startSuTimer(120);
+        setupSuOTP();
+      } else {
+        showAlert(result.message);
+        btn.innerHTML = 'Send OTP →';
+        btn.disabled  = false;
+      }
+    }
+
+    async function verifySignupOTP() {
+      hideAlert();
+      const inputs = document.querySelectorAll('#su-otp-inputs .otp-input');
+      const otp    = Array.from(inputs).map(i => i.value).join('');
+      if (otp.length !== 6) { showAlert('6 digit OTP daalo.'); return; }
+      const result = await FirebaseAuth.verifyPhoneOTP(otp, document.getElementById('sp-name').value.trim(), 'student');
+      if (result.success) {
+        clearInterval(suTimerInterval);
+        showSuccess('🎉', 'Welcome to NIT KKR!', 'Phone se register ho gaya! Ab seedha login kar sakte ho.');
+      } else {
+        showAlert(result.message);
+      }
+    }
+
+    function backToSignupPhone() {
+      document.getElementById('su-phone-step1').style.display = 'block';
+      document.getElementById('su-phone-step2').style.display = 'none';
+      document.getElementById('su-step1-dot').className = 'step-dot active';
+      document.getElementById('su-step-line').className = 'step-line';
+      document.getElementById('su-step2-dot').className = 'step-dot';
+      document.getElementById('btn-sp-send').innerHTML = 'Send OTP →';
+      document.getElementById('btn-sp-send').disabled  = false;
+      clearInterval(suTimerInterval);
+      hideAlert();
+    }
+
+    function startSuTimer(sec) {
+      clearInterval(suTimerInterval);
+      let r = sec;
+      const el = document.getElementById('su-timer');
+      suTimerInterval = setInterval(() => {
+        r--;
+        el.textContent = String(Math.floor(r/60)).padStart(2,'0') + ':' + String(r%60).padStart(2,'0');
+        if (r <= 0) { clearInterval(suTimerInterval); el.textContent = 'Expired'; }
+      }, 1000);
+    }
+
+    function setupSuOTP() {
+      const inputs = document.querySelectorAll('#su-otp-inputs .otp-input');
+      inputs.forEach((inp, i) => {
+        inp.value = ''; inp.className = 'otp-input';
+        inp.addEventListener('input', () => {
+          inp.value = inp.value.replace(/\D/g,'').slice(-1);
+          inp.classList.toggle('filled', inp.value !== '');
+          if (inp.value && i < inputs.length - 1) inputs[i+1].focus();
+        });
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Backspace' && !inp.value && i > 0) { inputs[i-1].focus(); inputs[i-1].value = ''; inputs[i-1].className = 'otp-input'; }
+        });
+        inp.addEventListener('paste', e => {
+          const p = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+          p.split('').forEach((ch, j) => { if (inputs[j]) { inputs[j].value = ch; inputs[j].classList.add('filled'); } });
+          e.preventDefault();
+        });
+      });
+      inputs[0].focus();
+    }
+  </script>
+</body>
+</html>

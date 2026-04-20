@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NIT KKR Search — Knowledge Engine</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+</head>
+<body id="body-root" class="page-home">
+
+  <!-- ══════════════════════════════════════════
+       NAVBAR
+  ══════════════════════════════════════════ -->
+  <header id="navbar" class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" id="navbar-logo" class="navbar__logo">
+        <span class="navbar__logo-icon">⬡</span>
+        <span class="navbar__logo-text">NIT<span class="navbar__logo-accent">KKR</span></span>
+      </a>
+
+      <nav id="navbar-links" class="navbar__links">
+        <a href="index.html" class="navbar__link navbar__link--active" data-page="home">Home</a>
+        <a href="dashboard-student.html" class="navbar__link" data-page="search">Search</a>
+        <a href="about.html" class="navbar__link" data-page="about">About</a>
+      </nav>
+
+      <div id="navbar-auth" class="navbar__auth">
+        <a href="dashboard-student.html" id="btn-student-nav" class="btn btn--ghost btn--sm">Student Search</a>
+        <a href="login.html" id="btn-login-nav" class="btn btn--primary btn--sm">Teacher / Admin Login</a>
+      </div>
+
+      <button id="navbar-hamburger" class="navbar__hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="navbar-mobile-menu" class="navbar__mobile-menu">
+      <a href="index.html" class="navbar__mobile-link">Home</a>
+      <a href="dashboard-student.html" class="navbar__mobile-link">Student Search</a>
+      <a href="about.html" class="navbar__mobile-link">About</a>
+      <a href="login.html" class="btn btn--primary btn--sm">Teacher / Admin Login</a>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════
+       HERO SECTION
+  ══════════════════════════════════════════ -->
+  <main id="main-content">
+    <section id="hero" class="hero">
+      <div class="hero__bg-grid" aria-hidden="true"></div>
+      <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
+      <div class="hero__orb hero__orb--2" aria-hidden="true"></div>
+
+      <div class="hero__content">
+        <div id="hero-badge" class="hero__badge">
+          <span class="hero__badge-dot"></span>
+          Powered by Groq + LangChain
+        </div>
+
+        <h1 id="hero-heading" class="hero__heading">
+          The Intelligence Layer<br />
+          of <span class="hero__heading-accent">NIT Kurukshetra</span>
+        </h1>
+
+        <p id="hero-subtext" class="hero__subtext">
+          Search PYQs, research papers, assignments, and institutional knowledge —
+          all in one place. Students search freely. Teachers and Admins login with NIT email.
+        </p>
+
+        <!-- Search Bar -->
+        <div id="hero-search-bar" class="hero__searchbar">
+          <div class="searchbar__wrapper">
+            <span class="searchbar__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input
+              type="text"
+              id="hero-search-input"
+              class="searchbar__input"
+              placeholder="Search PYQs, papers, assignments…"
+              autocomplete="off"
+            />
+            <button id="hero-search-btn" class="searchbar__btn btn btn--primary">Search</button>
+          </div>
+          <div class="hero__search-note">
+            <span class="search-note__item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              Students search freely
+            </span>
+            <span class="search-note__sep">•</span>
+            <span class="search-note__item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Teachers need <strong>@nitkkr.ac.in</strong> login
+            </span>
+          </div>
+          <div class="search-suggestions" id="search-suggestions"></div>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div id="hero-cta" class="hero__cta">
+          <a href="dashboard-student.html" id="btn-student-access" class="btn btn--primary btn--lg">
+            Search as Student
+          </a>
+          <a href="login.html" id="btn-teacher-access" class="btn btn--outline btn--lg">
+            Teacher / Admin Login
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         STATS BAR
+    ══════════════════════════════════════════ -->
+    <!-- <section class="stats-bar">
+      <div class="stats-bar__inner">
+        <div class="stat-pill" data-target="1200" data-suffix="+">
+          <svg class="stat-pill__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="stat-pill__num" id="stat-pyq">0</span>
+          <span class="stat-pill__label">PYQs Indexed</span>
+        </div>
+        <div class="stat-pill__divider"></div>
+        <div class="stat-pill" data-target="9" data-suffix="">
+          <svg class="stat-pill__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="stat-pill__num" id="stat-branch">0</span>
+          <span class="stat-pill__label">Branches</span>
+        </div>
+        <div class="stat-pill__divider"></div>
+        <div class="stat-pill" data-target="8" data-suffix="">
+          <svg class="stat-pill__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="stat-pill__num" id="stat-sem">0</span>
+          <span class="stat-pill__label">Semesters</span>
+        </div>
+        <div class="stat-pill__divider"></div>
+        <div class="stat-pill" data-target="500" data-suffix="+">
+          <svg class="stat-pill__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="stat-pill__num" id="stat-users">0</span>
+          <span class="stat-pill__label">Active Students</span>
+        </div>
+        <div class="stat-pill__divider"></div>
+        <div class="stat-pill" data-target="99" data-suffix="%">
+          <svg class="stat-pill__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg>
+          <span class="stat-pill__num" id="stat-ai">0</span>
+          <span class="stat-pill__label">AI Uptime</span>
+        </div>
+      </div>
+    </section> -->
+
+    <!-- ══════════════════════════════════════════
+         DEPARTMENT QUICK ACCESS
+    ══════════════════════════════════════════ -->
+    <section class="dept-section">
+      <div class="dept-section__inner">
+        <div class="section-label">Quick Access</div>
+        <h2 class="dept-section__heading">Browse by Department</h2>
+        <p class="dept-section__sub">Jump directly to PYQs filtered by your branch.</p>
+        <div class="dept-grid">
+          <a href="dashboard-student.html?branch=CSE" class="dept-card">
+            <div class="dept-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <span class="dept-card__name">CSE</span>
+            <span class="dept-card__full">Computer Science</span>
+            <span class="dept-card__arrow">→</span>
+          </a>
+          <a href="dashboard-student.html?branch=ECE" class="dept-card">
+            <div class="dept-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <span class="dept-card__name">ECE</span>
+            <span class="dept-card__full">Electronics & Comm.</span>
+            <span class="dept-card__arrow">→</span>
+          </a>
+          <a href="dashboard-student.html?branch=ME" class="dept-card">
+            <div class="dept-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M19.07 19.07l-1.41-1.41M5.34 5.34L3.93 3.93M21 12h-2M5 12H3M12 21v-2M12 5V3"/></svg>
+            </div>
+            <span class="dept-card__name">ME</span>
+            <span class="dept-card__full">Mechanical Engg.</span>
+            <span class="dept-card__arrow">→</span>
+          </a>
+          <a href="dashboard-student.html?branch=CE" class="dept-card">
+            <div class="dept-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <span class="dept-card__name">CE</span>
+            <span class="dept-card__full">Civil Engineering</span>
+            <span class="dept-card__arrow">→</span>
+          </a>
+          <a href="dashboard-student.html?branch=EE" class="dept-card">
+            <div class="dept-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <span class="dept-card__name">EE</span>
+            <span class="dept-card__full">Electrical Engg.</span>
+            <span class="dept-card__arrow">→</span>
+          </a>
+          <a href="dashboard-student.html?branch=IT" class="dept-card">
+            <div class="dept-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <span class="dept-card__name">IT</span>
+            <span class="dept-card__full">Information Tech.</span>
+            <span class="dept-card__arrow">→</span>
+          </a>
+          <a href="dashboard-student.html?branch=PIE" class="dept-card">
+            <div class="dept-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <span class="dept-card__name">PIE</span>
+            <span class="dept-card__full">Production & IE</span>
+            <span class="dept-card__arrow">→</span>
+          </a>
+          <a href="dashboard-student.html?branch=CH" class="dept-card">
+            <div class="dept-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+            </div>
+            <span class="dept-card__name">CH</span>
+            <span class="dept-card__full">Chemical Engg.</span>
+            <span class="dept-card__arrow">→</span>
+          </a>
+          <a href="dashboard-student.html?branch=BT" class="dept-card dept-card--cta">
+            <div class="dept-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <span class="dept-card__name">BT</span>
+            <span class="dept-card__full">Biotechnology</span>
+            <span class="dept-card__arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         FEATURES SECTION
+    ══════════════════════════════════════════ -->
+    <section id="features" class="features">
+      <div class="features__inner">
+        <div class="section-label">What We Offer</div>
+        <h2 class="features__heading">Three Views. One Platform.</h2>
+        <p class="features__subtext">Tailored dashboards for every role in NIT Kurukshetra's ecosystem.</p>
+
+        <div id="features-grid" class="features__grid">
+
+          <div id="feature-student" class="feature-card feature-card--student">
+            <div class="feature-card__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+            <h3 class="feature-card__title">Student View</h3>
+            <div class="feature-card__badge">✅ No Login Required</div>
+            <ul class="feature-card__list">
+              <li>Search Previous Year Questions (PYQs)</li>
+              <li>Filter by subject, year, semester</li>
+              <li>AI-powered answer suggestions</li>
+              <li>Bookmark & save papers</li>
+              <li>Personal to-do / study list</li>
+              <li>Download PYQs as PDF</li>
+            </ul>
+            <a href="dashboard-student.html" class="feature-card__btn btn btn--primary btn--sm">Open Student Search →</a>
+          </div>
+
+          <div id="feature-teacher" class="feature-card feature-card--teacher">
+            <div class="feature-card__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+            <h3 class="feature-card__title">Teacher View</h3>
+            <div class="feature-card__badge feature-card__badge--locked">🔒 Login Required</div>
+            <ul class="feature-card__list">
+              <li>Research on assignments & papers</li>
+              <li>Upload & manage study material</li>
+              <li>AI summarization of research papers</li>
+              <li>Citation & reference finder</li>
+              <li>Assignment generator</li>
+              <li>Plagiarism-check integration</li>
+            </ul>
+            <a href="login.html" class="feature-card__btn btn btn--primary btn--sm">Teacher Login →</a>
+          </div>
+
+          <div id="feature-admin" class="feature-card feature-card--admin">
+            <div class="feature-card__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <h3 class="feature-card__title">Admin View</h3>
+            <div class="feature-card__badge feature-card__badge--locked">🔒 Login Required</div>
+            <ul class="feature-card__list">
+              <li>Full website management</li>
+              <li>User management & access control</li>
+              <li>Content moderation & approval</li>
+              <li>Analytics dashboard</li>
+              <li>Database management UI</li>
+              <li>Email domain whitelist control</li>
+            </ul>
+            <a href="login.html" class="feature-card__btn btn btn--primary btn--sm">Admin Login →</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         EXTRA FEATURES
+    ══════════════════════════════════════════ -->
+    <section id="extras" class="extras">
+      <div class="extras__inner">
+        <div class="section-label">Extra Features</div>
+        <h2 class="extras__heading">Beyond Simple Search</h2>
+        <p class="extras__subtext">Everything a NIT KKR student needs — all in one place.</p>
+
+        <!-- LIVE FEATURES -->
+        <div class="extras__category-label">✅ Available Now</div>
+        <div id="extras-grid" class="extras__grid">
+
+          <div class="extra-item extra-item--live" id="extra-ai-chat" onclick="window.location.href='dashboard-student.html#ai-chat'" style="cursor:pointer;">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/><path d="M12 7v4M8 7a4 4 0 0 1 8 0"/></svg></span>
+              <span class="extra-item__status extra-item__status--live">Live</span>
+            </div>
+            <h4 class="extra-item__title">AI Chat Assistant</h4>
+            <p class="extra-item__desc">Ask any academic question in plain language. Groq-powered LLM answers instantly from NIT KKR's knowledge base.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">Groq AI</span>
+              <span class="extra-item__tag">Llama 3.3</span>
+            </div>
+          </div>
+
+          <div class="extra-item extra-item--live" id="extra-pyq" onclick="window.location.href='dashboard-student.html'" style="cursor:pointer;">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+              <span class="extra-item__status extra-item__status--live">Live</span>
+            </div>
+            <h4 class="extra-item__title">PYQ Search & Viewer</h4>
+            <p class="extra-item__desc">Filter by branch, semester, subject, year and exam type. View papers with auto-extracted questions and AI explanations.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">9 Branches</span>
+              <span class="extra-item__tag">PDF Viewer</span>
+            </div>
+          </div>
+
+          <div class="extra-item extra-item--live" id="extra-todo" onclick="window.location.href='dashboard-student.html#todo'" style="cursor:pointer;">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+              <span class="extra-item__status extra-item__status--live">Live</span>
+            </div>
+            <h4 class="extra-item__title">Smart To-Do List</h4>
+            <p class="extra-item__desc">Add tasks with deadlines and priority tags. Filter by Pending, Done, or High Priority. Counts update in real time.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">Priority Tags</span>
+              <span class="extra-item__tag">Filter Tabs</span>
+            </div>
+          </div>
+
+          <div class="extra-item extra-item--live" id="extra-notif" onclick="window.location.href='dashboard-student.html#notifications'" style="cursor:pointer;">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+              <span class="extra-item__status extra-item__status--live">Live</span>
+            </div>
+            <h4 class="extra-item__title">Live Notifications</h4>
+            <p class="extra-item__desc">Instant alerts when a teacher uploads a new question paper — no refresh needed. Real-time via localStorage events.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">Real-time</span>
+              <span class="extra-item__tag">Auto-detect</span>
+            </div>
+          </div>
+
+          <div class="extra-item extra-item--live" id="extra-bookmark" onclick="window.location.href='dashboard-student.html#bookmarks'" style="cursor:pointer;">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+              <span class="extra-item__status extra-item__status--live">Live</span>
+            </div>
+            <h4 class="extra-item__title">Bookmarks</h4>
+            <p class="extra-item__desc">Save any question paper with one click. Bookmarks persist across sessions. Re-read, ask AI, or view PDF anytime.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">Persistent</span>
+              <span class="extra-item__tag">localStorage</span>
+            </div>
+          </div>
+
+          <div class="extra-item extra-item--live" id="extra-pdf-parse" onclick="window.location.href='login.html'" style="cursor:pointer;">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+              <span class="extra-item__status extra-item__status--live">Live</span>
+            </div>
+            <h4 class="extra-item__title">Auto Question Extraction</h4>
+            <p class="extra-item__desc">Teachers upload a PDF — questions are auto-extracted, structured, and made available with per-question Ask AI buttons for students.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">PDF.js</span>
+              <span class="extra-item__tag">Smart Parse</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COMING SOON FEATURES -->
+        <div class="extras__category-label extras__category-label--soon">🚀 Coming Soon</div>
+        <div id="extras-grid-soon" class="extras__grid extras__grid--soon">
+
+          <div class="extra-item extra-item--soon" id="extra-collab">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+              <span class="extra-item__status extra-item__status--soon">Coming Soon</span>
+            </div>
+            <h4 class="extra-item__title">Study Groups</h4>
+            <p class="extra-item__desc">Create or join study groups by subject. Share resources, annotate PDFs together, and discuss questions in real time.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">Collaboration</span>
+              <span class="extra-item__tag">Real-time Chat</span>
+            </div>
+          </div>
+
+          <div class="extra-item extra-item--soon" id="extra-analytics">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+              <span class="extra-item__status extra-item__status--soon">Coming Soon</span>
+            </div>
+            <h4 class="extra-item__title">Analytics Dashboard</h4>
+            <p class="extra-item__desc">Most searched topics, trending papers by department, weekly activity heatmaps, and AI usage statistics for admins.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">Insights</span>
+              <span class="extra-item__tag">Heatmaps</span>
+            </div>
+          </div>
+
+          <div class="extra-item extra-item--soon" id="extra-offline">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+              <span class="extra-item__status extra-item__status--soon">Coming Soon</span>
+            </div>
+            <h4 class="extra-item__title">Offline Access</h4>
+            <p class="extra-item__desc">PWA support — install the app, cache PYQs locally, and study without internet. Sync when back online.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">PWA</span>
+              <span class="extra-item__tag">Service Worker</span>
+            </div>
+          </div>
+
+          <div class="extra-item extra-item--soon" id="extra-plagiarism">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+              <span class="extra-item__status extra-item__status--soon">Coming Soon</span>
+            </div>
+            <h4 class="extra-item__title">Plagiarism Checker</h4>
+            <p class="extra-item__desc">Teachers can run assignments through an AI plagiarism detector before grading. Highlights similar sections with source links.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">For Teachers</span>
+              <span class="extra-item__tag">AI-powered</span>
+            </div>
+          </div>
+
+          <div class="extra-item extra-item--soon" id="extra-syllabus">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>
+              <span class="extra-item__status extra-item__status--soon">Coming Soon</span>
+            </div>
+            <h4 class="extra-item__title">Syllabus Tracker</h4>
+            <p class="extra-item__desc">Map each PYQ question to the official NIT KKR syllabus unit. See which topics are most frequently examined every year.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">Syllabus Mapping</span>
+              <span class="extra-item__tag">Trend Analysis</span>
+            </div>
+          </div>
+
+          <div class="extra-item extra-item--soon" id="extra-mobile">
+            <div class="extra-item__header">
+              <span class="extra-item__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
+              <span class="extra-item__status extra-item__status--soon">Coming Soon</span>
+            </div>
+            <h4 class="extra-item__title">Mobile App</h4>
+            <p class="extra-item__desc">Native Android & iOS app for NIT KKR students. Push notifications, offline PYQs, and AI chat on the go.</p>
+            <div class="extra-item__footer">
+              <span class="extra-item__tag">Android</span>
+              <span class="extra-item__tag">iOS</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+   
+
+    <!-- ══════════════════════════════════════════
+         HOW IT WORKS
+    ══════════════════════════════════════════ -->
+    <section id="how-it-works" class="how-it-works">
+      <div class="how-it-works__inner">
+        <div class="section-label">Process</div>
+        <h2 class="how-it-works__heading">How It Works</h2>
+        <div id="steps-grid" class="steps__grid">
+          <div class="step-item" id="step-1">
+            <div class="step-item__num">01</div>
+            <h4 class="step-item__title">Students — Just Visit</h4>
+            <p class="step-item__desc">Students directly visit and use the full search engine. No login needed.</p>
+          </div>
+          <div class="step-item__arrow" aria-hidden="true">→</div>
+          <div class="step-item" id="step-2">
+            <div class="step-item__num">02</div>
+            <h4 class="step-item__title">Teachers / Admins Login</h4>
+            <p class="step-item__desc">Use your <strong>@nitkkr.ac.in</strong> email to unlock advanced access.</p>
+          </div>
+          <div class="step-item__arrow" aria-hidden="true">→</div>
+          <div class="step-item" id="step-3">
+            <div class="step-item__num">03</div>
+            <h4 class="step-item__title">Role Assigned</h4>
+            <p class="step-item__desc">Automatically routed to Teacher or Admin dashboard based on your profile.</p>
+          </div>
+          <div class="step-item__arrow" aria-hidden="true">→</div>
+          <div class="step-item" id="step-4">
+            <div class="step-item__num">04</div>
+            <h4 class="step-item__title">AI-Powered Answers</h4>
+            <p class="step-item__desc">Groq LLaMA 3.3 + LangChain RAG searches your uploaded database intelligently.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════ -->
+  <footer id="footer" class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <span class="navbar__logo-icon">⬡</span>
+        <span class="footer__brand-name">NIT KKR Search</span>
+        <p class="footer__brand-desc">The AI-powered knowledge engine for NIT Kurukshetra.</p>
+      </div>
+      <div class="footer__links-group">
+        <h5 class="footer__group-title">Platform</h5>
+        <a href="dashboard-student.html" class="footer__link">Student Search</a>
+        <a href="login.html" class="footer__link">Teacher / Admin Login</a>
+        <a href="about.html" class="footer__link">About</a>
+      </div>
+      <div class="footer__links-group">
+        <h5 class="footer__group-title">Dashboards</h5>
+        <a href="dashboard-student.html" class="footer__link">Student</a>
+        <a href="login.html" class="footer__link">Teacher</a>
+        <a href="login.html" class="footer__link">Admin</a>
+      </div>
+      <div class="footer__links-group">
+        <h5 class="footer__group-title">Info</h5>
+        <a href="privacy.html" class="footer__link">Privacy Policy</a>
+        <a href="terms.html" class="footer__link">Terms of Use</a>
+        <a href="contact.html" class="footer__link">Contact</a>
+      </div>
+    </div>
+    <div id="footer-bottom" class="footer__bottom">
+      <span>© 2025 NIT Kurukshetra. All rights reserved.</span>
+      <span>Built with Groq LLaMA 3.3 + LangChain</span>
+    </div>
+  </footer>
+
+  
+  <script>
+  // ── COUNT-UP ANIMATION ─────────────────────────
+  function countUp(el, target, suffix, duration = 1800) {
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start = Math.min(start + step, target);
+      el.textContent = Math.floor(start) + suffix;
+      if (start >= target) clearInterval(timer);
+    }, 16);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        document.querySelectorAll('.stat-pill').forEach(pill => {
+          const target = parseInt(pill.dataset.target);
+          const suffix = pill.dataset.suffix || '';
+          const numEl = pill.querySelector('.stat-pill__num');
+          if (numEl) countUp(numEl, target, suffix);
+        });
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const statsBar = document.querySelector('.stats-bar');
+  if (statsBar) observer.observe(statsBar);
+
+  // ── LIVE SEARCH SUGGESTIONS ───────────────────
+  const suggestions = [
+    { text: 'Data Structures CSE Sem 3', branch: 'CSE' },
+    { text: 'Operating Systems CSE Sem 5', branch: 'CSE' },
+    { text: 'Digital Electronics ECE Sem 3', branch: 'ECE' },
+    { text: 'Thermodynamics ME Sem 3', branch: 'ME' },
+    { text: 'Signals & Systems ECE Sem 4', branch: 'ECE' },
+    { text: 'DBMS CSE Sem 4', branch: 'CSE' },
+    { text: 'Circuit Theory EE Sem 2', branch: 'EE' },
+    { text: 'Algorithms CSE Sem 4', branch: 'CSE' },
+    { text: 'Fluid Mechanics CE Sem 4', branch: 'CE' },
+    { text: 'Computer Networks CSE Sem 6', branch: 'CSE' },
+    { text: 'Microprocessors ECE Sem 5', branch: 'ECE' },
+    { text: 'Engineering Mathematics Sem 1', branch: 'ALL' },
+  ];
+
+  const searchInput = document.getElementById('hero-search-input');
+  const searchBtn = document.getElementById('hero-search-btn');
+  const suggestionsBox = document.getElementById('search-suggestions');
+
+  if (searchInput && suggestionsBox) {
+    searchInput.addEventListener('input', () => {
+      const val = searchInput.value.trim().toLowerCase();
+      if (val.length < 2) { suggestionsBox.innerHTML = ''; suggestionsBox.classList.remove('active'); return; }
+      const filtered = suggestions.filter(s => s.text.toLowerCase().includes(val)).slice(0, 5);
+      if (!filtered.length) { suggestionsBox.innerHTML = ''; suggestionsBox.classList.remove('active'); return; }
+      suggestionsBox.innerHTML = filtered.map(s =>
+        `<div class="suggestion-item" data-text="${s.text}" data-branch="${s.branch}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>${s.text}</span>
+          <span class="suggestion-item__branch">${s.branch}</span>
+        </div>`
+      ).join('');
+      suggestionsBox.classList.add('active');
+      suggestionsBox.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', () => {
+          searchInput.value = item.dataset.text;
+          suggestionsBox.innerHTML = ''; suggestionsBox.classList.remove('active');
+          window.location.href = `dashboard-student.html?q=${encodeURIComponent(item.dataset.text)}&branch=${item.dataset.branch}`;
+        });
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!suggestionsBox.contains(e.target) && e.target !== searchInput) {
+        suggestionsBox.innerHTML = ''; suggestionsBox.classList.remove('active');
+      }
+    });
+  }
+
+  if (searchBtn && searchInput) {
+    searchBtn.addEventListener('click', () => {
+      const q = searchInput.value.trim();
+      if (q) window.location.href = `dashboard-student.html?q=${encodeURIComponent(q)}`;
+      else window.location.href = 'dashboard-student.html';
+    });
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') searchBtn.click();
+    });
+  }
+
+  // ── ACTIVITY FEED AUTO-SCROLL ─────────────────
+  const feed = document.getElementById('hero-activity-feed');
+  if (feed) {
+    let idx = 0;
+    const items = feed.querySelectorAll('.activity__item');
+    setInterval(() => {
+      items.forEach(i => i.classList.remove('activity__item--active'));
+      idx = (idx + 1) % items.length;
+      items[idx].classList.add('activity__item--active');
+    }, 2500);
+    if (items[0]) items[0].classList.add('activity__item--active');
+  }
+  </script>
+
+  <script src="main.js"></script>
+</body>
+</html>

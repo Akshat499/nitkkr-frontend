@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — NIT KKR Search Engine</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    .contact-hero {
+      padding: 120px 24px 56px;
+      text-align: center;
+      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(108,99,255,0.13), transparent);
+    }
+    .contact-hero__badge { display: inline-block; background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.3); color: #a89cff; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 5px 14px; border-radius: 99px; margin-bottom: 20px; }
+    .contact-hero__title { font-size: clamp(28px, 4vw, 44px); font-weight: 800; color: #fff; margin: 0 0 12px; }
+    .contact-hero__sub { font-size: 15px; color: #aaa; max-width: 480px; margin: 0 auto; line-height: 1.7; }
+
+    .contact-body {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 40px;
+    }
+    @media (max-width: 700px) { .contact-body { grid-template-columns: 1fr; } }
+
+    /* Left — info cards */
+    .contact-info { display: flex; flex-direction: column; gap: 16px; }
+    .contact-info-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      transition: border-color .2s;
+    }
+    .contact-info-card:hover { border-color: rgba(108,99,255,0.35); }
+    .contact-info-card__icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+    .contact-info-card__title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .contact-info-card__val { font-size: 13px; color: #aaa; line-height: 1.6; }
+    .contact-info-card__val a { color: var(--clr-primary, #6c63ff); text-decoration: none; }
+    .contact-info-card__val a:hover { text-decoration: underline; }
+
+    /* Right — form */
+    .contact-form-wrap {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 32px;
+    }
+    .contact-form-wrap h2 { font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 24px; }
+    .contact-form { display: flex; flex-direction: column; gap: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; font-weight: 600; color: #aaa; letter-spacing: .05em; text-transform: uppercase; }
+    .contact-form textarea.form-input { resize: vertical; min-height: 120px; font-family: inherit; }
+    .contact-form select.form-input { cursor: pointer; }
+    .contact-form__submit { margin-top: 4px; }
+    .contact-success {
+      display: none;
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 10px;
+      padding: 16px 20px;
+      color: #22c55e;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body class="page-contact">
+
+  <header class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__logo">
+        <span class="navbar__logo-icon">⬡</span>
+        <span class="navbar__logo-text">NIT<span class="navbar__logo-accent">KKR</span></span>
+      </a>
+      <nav class="navbar__links">
+        <a href="index.html" class="navbar__link">Home</a>
+        <a href="dashboard-student.html" class="navbar__link">Search</a>
+        <a href="about.html" class="navbar__link">About</a>
+      </nav>
+      <div class="navbar__auth">
+        <a href="dashboard-student.html" class="btn btn--ghost btn--sm">Student Search</a>
+        <a href="login.html" class="btn btn--primary btn--sm">Teacher / Admin Login</a>
+      </div>
+      <button class="navbar__hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+
+  <main>
+    <div class="contact-hero">
+      <div class="contact-hero__badge">📬 Get in Touch</div>
+      <h1 class="contact-hero__title">Contact Us</h1>
+      <p class="contact-hero__sub">Have a question, bug report, or feature request? We'd love to hear from you.</p>
+    </div>
+
+    <div class="contact-body">
+
+      <!-- LEFT: Info -->
+      <div class="contact-info">
+
+        <div class="contact-info-card">
+          <span class="contact-info-card__icon">🏛️</span>
+          <div>
+            <div class="contact-info-card__title">Institution</div>
+            <div class="contact-info-card__val">National Institute of Technology<br/>Kurukshetra, Haryana — 136119<br/>India</div>
+          </div>
+        </div>
+
+        <div class="contact-info-card">
+          <span class="contact-info-card__icon">📧</span>
+          <div>
+            <div class="contact-info-card__title">General Queries</div>
+            <div class="contact-info-card__val"><a href="mailto:info@nitkkr.ac.in">info@nitkkr.ac.in</a></div>
+          </div>
+        </div>
+
+        <div class="contact-info-card">
+          <span class="contact-info-card__icon">🐛</span>
+          <div>
+            <div class="contact-info-card__title">Bug Reports & Technical Issues</div>
+            <div class="contact-info-card__val">Use the form on this page with category "Bug Report". We'll get back within 24–48 hours.</div>
+          </div>
+        </div>
+
+        <div class="contact-info-card">
+          <span class="contact-info-card__icon">🔑</span>
+          <div>
+            <div class="contact-info-card__title">Teacher Access Request</div>
+            <div class="contact-info-card__val">Faculty who need dashboard access should contact the Admin with their @nitkkr.ac.in email.</div>
+          </div>
+        </div>
+
+        <div class="contact-info-card">
+          <span class="contact-info-card__icon">💡</span>
+          <div>
+            <div class="contact-info-card__title">Feature Suggestions</div>
+            <div class="contact-info-card__val">We actively build based on student feedback. Drop your idea in the form — it might be in the next release!</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Form -->
+      <div class="contact-form-wrap">
+        <h2>Send a Message</h2>
+        <div class="contact-form" id="contact-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cf-name">Your Name</label>
+              <input type="text" id="cf-name" class="form-input" placeholder="Rahul Kumar" />
+            </div>
+            <div class="form-group">
+              <label for="cf-roll">Roll No. / Email</label>
+              <input type="text" id="cf-roll" class="form-input" placeholder="21CSE001 or your email" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="cf-category">Category</label>
+            <select id="cf-category" class="form-input">
+              <option value="">Select a category</option>
+              <option value="bug">🐛 Bug Report</option>
+              <option value="feature">💡 Feature Request</option>
+              <option value="access">🔑 Teacher Access Request</option>
+              <option value="content">📄 Content Issue (wrong paper, etc.)</option>
+              <option value="general">💬 General Query</option>
+              <option value="other">📌 Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cf-subject">Subject</label>
+            <input type="text" id="cf-subject" class="form-input" placeholder="Brief summary of your message" />
+          </div>
+          <div class="form-group">
+            <label for="cf-message">Message</label>
+            <textarea id="cf-message" class="form-input" placeholder="Describe your query, issue, or suggestion in detail…"></textarea>
+          </div>
+          <div class="contact-form__submit">
+            <button id="cf-submit" class="btn btn--primary btn--lg" style="width:100%;">Send Message →</button>
+          </div>
+          <div class="contact-success" id="cf-success">
+            ✅ Message sent! We'll get back to you within 1–2 working days.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <span class="navbar__logo-icon">⬡</span>
+        <span class="footer__brand-name">NIT KKR Search</span>
+        <p class="footer__brand-desc">The AI-powered knowledge engine for NIT Kurukshetra.</p>
+      </div>
+      <div class="footer__links-group">
+        <h5 class="footer__group-title">Platform</h5>
+        <a href="dashboard-student.html" class="footer__link">Student Search</a>
+        <a href="login.html" class="footer__link">Teacher / Admin Login</a>
+        <a href="about.html" class="footer__link">About</a>
+      </div>
+      <div class="footer__links-group">
+        <h5 class="footer__group-title">Info</h5>
+        <a href="privacy.html" class="footer__link">Privacy Policy</a>
+        <a href="terms.html" class="footer__link">Terms of Use</a>
+        <a href="contact.html" class="footer__link">Contact</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© 2025 NIT Kurukshetra. All rights reserved.</span>
+      <span>Built with Claude AI + LangChain</span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script>
+    document.getElementById('cf-submit').addEventListener('click', () => {
+      const name     = document.getElementById('cf-name').value.trim();
+      const subject  = document.getElementById('cf-subject').value.trim();
+      const message  = document.getElementById('cf-message').value.trim();
+      const category = document.getElementById('cf-category').value;
+
+      if (!name)     { alert('Please enter your name.'); return; }
+      if (!category) { alert('Please select a category.'); return; }
+      if (!subject)  { alert('Please enter a subject.'); return; }
+      if (!message)  { alert('Please write a message.'); return; }
+
+      // Save locally (could be sent to backend later)
+      const submissions = JSON.parse(localStorage.getItem('nitkkr_contact') || '[]');
+      submissions.push({
+        name, roll: document.getElementById('cf-roll').value.trim(),
+        category, subject, message,
+        time: new Date().toISOString()
+      });
+      localStorage.setItem('nitkkr_contact', JSON.stringify(submissions));
+
+      // Show success
+      document.getElementById('cf-submit').disabled = true;
+      document.getElementById('cf-success').style.display = 'block';
+
+      // Reset form after delay
+      setTimeout(() => {
+        document.getElementById('cf-name').value    = '';
+        document.getElementById('cf-roll').value    = '';
+        document.getElementById('cf-category').value = '';
+        document.getElementById('cf-subject').value = '';
+        document.getElementById('cf-message').value = '';
+        document.getElementById('cf-submit').disabled = false;
+        document.getElementById('cf-success').style.display = 'none';
+      }, 3500);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — NIT KKR Search Engine</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    .policy-hero {
+      padding: 120px 24px 48px;
+      text-align: center;
+      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(108,99,255,0.12), transparent);
+    }
+    .policy-hero__badge {
+      display: inline-block;
+      background: rgba(108,99,255,0.12);
+      border: 1px solid rgba(108,99,255,0.3);
+      color: #a89cff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 20px;
+    }
+    .policy-hero__title { font-size: clamp(28px, 4vw, 44px); font-weight: 800; color: #fff; margin: 0 0 12px; }
+    .policy-hero__meta { font-size: 13px; color: #888; }
+
+    .policy-body {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+    .policy-section__title {
+      font-size: 18px; font-weight: 700; color: #fff;
+      margin: 0 0 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .policy-section__text {
+      font-size: 14.5px; color: #aaa; line-height: 1.85; margin: 0 0 10px;
+    }
+    .policy-section__text:last-child { margin: 0; }
+    .policy-list {
+      list-style: none; padding: 0; margin: 10px 0 0;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .policy-list li {
+      font-size: 14px; color: #aaa; line-height: 1.7;
+      padding-left: 20px; position: relative;
+    }
+    .policy-list li::before {
+      content: '→'; position: absolute; left: 0;
+      color: var(--clr-primary, #6c63ff); font-weight: 700;
+    }
+    .policy-highlight {
+      background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.2);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 13.5px;
+      color: #c4baff;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body class="page-policy">
+
+  <header class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__logo">
+        <span class="navbar__logo-icon">⬡</span>
+        <span class="navbar__logo-text">NIT<span class="navbar__logo-accent">KKR</span></span>
+      </a>
+      <nav class="navbar__links">
+        <a href="index.html" class="navbar__link">Home</a>
+        <a href="dashboard-student.html" class="navbar__link">Search</a>
+        <a href="about.html" class="navbar__link">About</a>
+      </nav>
+      <div class="navbar__auth">
+        <a href="dashboard-student.html" class="btn btn--ghost btn--sm">Student Search</a>
+        <a href="login.html" class="btn btn--primary btn--sm">Teacher / Admin Login</a>
+      </div>
+      <button class="navbar__hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+
+  <main>
+    <div class="policy-hero">
+      <div class="policy-hero__badge">🔒 Legal</div>
+      <h1 class="policy-hero__title">Privacy Policy</h1>
+      <p class="policy-hero__meta">Last updated: March 2026 &nbsp;•&nbsp; NIT Kurukshetra Search Engine</p>
+    </div>
+
+    <div class="policy-body">
+
+      <div class="policy-highlight">
+        <strong>Summary:</strong> We do not collect or transmit any personal data to external servers. All your data — bookmarks, to-do tasks, session info — stays in your browser's localStorage only. Teacher/admin credentials are stored in a local config.json file.
+      </div>
+
+      <div>
+        <h2 class="policy-section__title">1. Information We Collect</h2>
+        <p class="policy-section__text">NIT KKR Search Engine is designed with a privacy-first approach. We collect minimal information:</p>
+        <ul class="policy-list">
+          <li>Student access requires no login — no personal data is collected.</li>
+          <li>Teachers and Admins log in with their @nitkkr.ac.in institutional email.</li>
+          <li>Uploaded PDF metadata (title, subject, branch, year) is stored in your browser's localStorage.</li>
+          <li>Bookmarks, to-do tasks, and notification preferences are stored locally only.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="policy-section__title">2. How We Use Your Data</h2>
+        <p class="policy-section__text">Data stored in localStorage is used solely to:</p>
+        <ul class="policy-list">
+          <li>Maintain your session during a teacher/admin login.</li>
+          <li>Remember your bookmarked question papers.</li>
+          <li>Save your to-do tasks and study list.</li>
+          <li>Display notifications for newly uploaded papers.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="policy-section__title">3. Third-Party Services</h2>
+        <p class="policy-section__text">This platform uses the following external services:</p>
+        <ul class="policy-list">
+          <li><strong>Groq API</strong> — When you use Ask AI, your question text is sent to Groq's servers. No personal identity is shared. See groq.com/privacy.</li>
+          <li><strong>Google Fonts</strong> — Font files are loaded from Google's CDN. This is a standard web practice.</li>
+          <li><strong>PDF.js (Cloudflare CDN)</strong> — Used for PDF text extraction on the teacher dashboard.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="policy-section__title">4. Data Storage & Security</h2>
+        <p class="policy-section__text">All user data is stored in your browser's localStorage. This means:</p>
+        <ul class="policy-list">
+          <li>Data never leaves your device (except AI queries to Groq).</li>
+          <li>Clearing browser data removes all stored information.</li>
+          <li>No database server or backend stores your personal information.</li>
+          <li>Teacher sessions are automatically cleared on tab close or inactivity.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="policy-section__title">5. Your Rights</h2>
+        <p class="policy-section__text">Since all data is stored locally in your browser, you have full control:</p>
+        <ul class="policy-list">
+          <li>Clear localStorage at any time via browser settings to delete all data.</li>
+          <li>Bookmarks and tasks can be deleted individually within the dashboard.</li>
+          <li>No account deletion request is needed — there is no central account system.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="policy-section__title">6. Contact</h2>
+        <p class="policy-section__text">For any privacy-related concerns, please contact the NIT KKR development team via the <a href="contact.html" style="color:var(--clr-primary);">Contact page</a>.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <span class="navbar__logo-icon">⬡</span>
+        <span class="footer__brand-name">NIT KKR Search</span>
+        <p class="footer__brand-desc">The AI-powered knowledge engine for NIT Kurukshetra.</p>
+      </div>
+      <div class="footer__links-group">
+        <h5 class="footer__group-title">Platform</h5>
+        <a href="dashboard-student.html" class="footer__link">Student Search</a>
+        <a href="login.html" class="footer__link">Teacher / Admin Login</a>
+        <a href="about.html" class="footer__link">About</a>
+      </div>
+      <div class="footer__links-group">
+        <h5 class="footer__group-title">Info</h5>
+        <a href="privacy.html" class="footer__link">Privacy Policy</a>
+        <a href="terms.html" class="footer__link">Terms of Use</a>
+        <a href="contact.html" class="footer__link">Contact</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© 2025 NIT Kurukshetra. All rights reserved.</span>
+      <span>Built with Claude AI + LangChain</span>
+    </div>
+  </footer>
+  <script src="main.js"></script>
+</body>
+</html>

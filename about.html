@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — NIT KKR Search Engine</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    .about-hero {
+      padding: 120px 24px 64px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .about-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(108,99,255,0.15), transparent);
+      pointer-events: none;
+    }
+    .about-hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(108,99,255,0.12);
+      border: 1px solid rgba(108,99,255,0.3);
+      color: #a89cff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 99px;
+      margin-bottom: 24px;
+    }
+    .about-hero__title {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 16px;
+      line-height: 1.15;
+    }
+    .about-hero__title span { color: var(--clr-primary, #6c63ff); }
+    .about-hero__sub {
+      font-size: 17px;
+      color: #aaa;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .about-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 56px;
+    }
+
+    .about-block__label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--clr-primary, #6c63ff);
+      margin-bottom: 10px;
+    }
+    .about-block__title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 14px;
+    }
+    .about-block__text {
+      font-size: 15px;
+      color: #aaa;
+      line-height: 1.8;
+      margin: 0 0 12px;
+    }
+
+    .about-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .about-stack__item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .about-stack__icon { font-size: 22px; }
+    .about-stack__name { font-size: 14px; font-weight: 600; color: #fff; }
+    .about-stack__role { font-size: 12px; color: #888; }
+
+    .about-team {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .team-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 24px 20px;
+      text-align: center;
+      transition: border-color .2s, transform .2s;
+    }
+    .team-card:hover { border-color: rgba(108,99,255,0.4); transform: translateY(-3px); }
+    .team-card__avatar {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #a89cff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800; color: #fff;
+      margin: 0 auto 12px;
+    }
+    .team-card__name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .team-card__role { font-size: 12px; color: #888; }
+
+    .about-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 20px;
+      border-left: 2px solid rgba(108,99,255,0.3);
+      padding-left: 28px;
+    }
+    .tl-item {
+      position: relative;
+      padding-bottom: 28px;
+    }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -35px; top: 4px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--clr-primary, #6c63ff);
+      border: 2px solid #0f0f1a;
+    }
+    .tl-item__date { font-size: 11px; color: var(--clr-primary,#6c63ff); font-weight: 600; margin-bottom: 4px; }
+    .tl-item__title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .tl-item__desc { font-size: 13px; color: #888; line-height: 1.6; }
+
+    .about-cta {
+      background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(168,156,255,0.08));
+      border: 1px solid rgba(108,99,255,0.25);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+    }
+    .about-cta__title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .about-cta__sub { font-size: 14px; color: #aaa; margin-bottom: 24px; }
+    .about-cta__btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body id="body-root" class="page-about">
+
+  <!-- NAVBAR -->
+  <header id="navbar" class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__logo">
+        <span class="navbar__logo-icon">⬡</span>
+        <span class="navbar__logo-text">NIT<span class="navbar__logo-accent">KKR</span></span>
+      </a>
+      <nav class="navbar__links">
+        <a href="index.html" class="navbar__link">Home</a>
+        <a href="dashboard-student.html" class="navbar__link">Search</a>
+        <a href="about.html" class="navbar__link navbar__link--active">About</a>
+      </nav>
+      <div class="navbar__auth">
+        <a href="dashboard-student.html" class="btn btn--ghost btn--sm">Student Search</a>
+        <a href="login.html" class="btn btn--primary btn--sm">Teacher / Admin Login</a>
+      </div>
+      <button id="navbar-hamburger" class="navbar__hamburger"><span></span><span></span><span></span></button>
+    </div>
+    <div id="navbar-mobile-menu" class="navbar__mobile-menu">
+      <a href="index.html" class="navbar__mobile-link">Home</a>
+      <a href="dashboard-student.html" class="navbar__mobile-link">Student Search</a>
+      <a href="about.html" class="navbar__mobile-link">About</a>
+      <a href="login.html" class="btn btn--primary btn--sm">Teacher / Admin Login</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <div class="about-hero">
+      <div class="about-hero__badge">⬡ About the Project</div>
+      <h1 class="about-hero__title">Built for <span>NIT Kurukshetra</span><br/>By Students, For Students</h1>
+      <p class="about-hero__sub">An AI-powered academic knowledge engine that makes finding PYQs, understanding concepts, and managing study resources effortless for every NIT KKR student.</p>
+    </div>
+
+    <div class="about-content">
+
+      <!-- WHAT IS IT -->
+      <div>
+        <div class="about-block__label">The Project</div>
+        <h2 class="about-block__title">What is NIT KKR Search Engine?</h2>
+        <p class="about-block__text">NIT KKR Search Engine is an AI-powered academic platform built specifically for the students, teachers, and administration of National Institute of Technology, Kurukshetra. It centralises all academic resources — Previous Year Question papers, study material, and AI-assisted learning — into one intelligent, fast, and beautiful interface.</p>
+        <p class="about-block__text">Students get free, instant access to PYQs filtered by branch, semester, subject, year, and exam type. Each question comes with a one-click AI tutor powered by Groq's Llama 3.3 model. Teachers upload PDFs and the platform automatically extracts questions, making them searchable and AI-ready in seconds.</p>
+      </div>
+
+      <!-- TECH STACK -->
+      <div>
+        <div class="about-block__label">Technology</div>
+        <h2 class="about-block__title">Tech Stack</h2>
+        <p class="about-block__text">Built with modern, production-grade tools — fast, reliable, and AI-native from day one.</p>
+        <div class="about-stack">
+          <div class="about-stack__item">
+            <span class="about-stack__icon">🤖</span>
+            <span class="about-stack__name">Claude AI</span>
+            <span class="about-stack__role">Core AI engine</span>
+          </div>
+          <div class="about-stack__item">
+            <span class="about-stack__icon">⚡</span>
+            <span class="about-stack__name">Groq + Llama 3.3</span>
+            <span class="about-stack__role">Fast AI responses</span>
+          </div>
+          <div class="about-stack__item">
+            <span class="about-stack__icon">🔗</span>
+            <span class="about-stack__name">LangChain</span>
+            <span class="about-stack__role">RAG pipeline</span>
+          </div>
+          <div class="about-stack__item">
+            <span class="about-stack__icon">📄</span>
+            <span class="about-stack__name">PDF.js</span>
+            <span class="about-stack__role">Question extraction</span>
+          </div>
+          <div class="about-stack__item">
+            <span class="about-stack__icon">🌐</span>
+            <span class="about-stack__name">HTML / CSS / JS</span>
+            <span class="about-stack__role">Frontend</span>
+          </div>
+          <div class="about-stack__item">
+            <span class="about-stack__icon">🐍</span>
+            <span class="about-stack__name">FastAPI</span>
+            <span class="about-stack__role">Backend API</span>
+          </div>
+          <div class="about-stack__item">
+            <span class="about-stack__icon">💾</span>
+            <span class="about-stack__name">localStorage</span>
+            <span class="about-stack__role">Client storage</span>
+          </div>
+          <div class="about-stack__item">
+            <span class="about-stack__icon">🎨</span>
+            <span class="about-stack__name">Sora + JetBrains</span>
+            <span class="about-stack__role">Typography</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div>
+        <div class="about-block__label">Journey</div>
+        <h2 class="about-block__title">Development Timeline</h2>
+        <div class="about-timeline">
+          <div class="tl-item">
+            <div class="tl-item__date">Phase 1 — Foundation</div>
+            <div class="tl-item__title">Core PYQ Search Engine</div>
+            <div class="tl-item__desc">Built the student dashboard with branch/semester/subject filters, localStorage-based PYQ database, and basic PDF viewer.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-item__date">Phase 2 — AI Integration</div>
+            <div class="tl-item__title">Ask AI per Question</div>
+            <div class="tl-item__desc">Integrated Groq API (Llama 3.3-70b) with per-question context. Teachers can upload PDFs and questions are auto-extracted using PDF.js.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-item__date">Phase 3 — Productivity Tools</div>
+            <div class="tl-item__title">Bookmarks, To-Do, Notifications</div>
+            <div class="tl-item__desc">Added localStorage-powered bookmarks, smart to-do list with priority/filter, and real-time notifications when new papers are uploaded.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-item__date">Phase 4 — Coming Soon</div>
+            <div class="tl-item__title">Study Groups, Analytics, Mobile App</div>
+            <div class="tl-item__desc">Real-time collaboration, department-wide analytics dashboard, PWA support, plagiarism checker, and native mobile apps.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="about-cta">
+        <div class="about-cta__title">Start Using It Today</div>
+        <div class="about-cta__sub">Free for all NIT KKR students. No login needed to search PYQs.</div>
+        <div class="about-cta__btns">
+          <a href="dashboard-student.html" class="btn btn--primary btn--lg">Search PYQs →</a>
+          <a href="index.html" class="btn btn--outline btn--lg">Back to Home</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <span class="navbar__logo-icon">⬡</span>
+        <span class="footer__brand-name">NIT KKR Search</span>
+        <p class="footer__brand-desc">The AI-powered knowledge engine for NIT Kurukshetra.</p>
+      </div>
+      <div class="footer__links-group">
+        <h5 class="footer__group-title">Platform</h5>
+        <a href="dashboard-student.html" class="footer__link">Student Search</a>
+        <a href="login.html" class="footer__link">Teacher / Admin Login</a>
+        <a href="about.html" class="footer__link">About</a>
+      </div>
+      <div class="footer__links-group">
+        <h5 class="footer__group-title">Dashboards</h5>
+        <a href="dashboard-student.html" class="footer__link">Student</a>
+        <a href="login.html" class="footer__link">Teacher</a>
+        <a href="login.html" class="footer__link">Admin</a>
+      </div>
+      <div class="footer__links-group">
+        <h5 class="footer__group-title">Info</h5>
+        <a href="privacy.html" class="footer__link">Privacy Policy</a>
+        <a href="terms.html" class="footer__link">Terms of Use</a>
+        <a href="contact.html" class="footer__link">Contact</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© 2025 NIT Kurukshetra. All rights reserved.</span>
+      <span>Built with Claude AI + LangChain</span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

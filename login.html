@@ -189,16 +189,8 @@
         return;
       }
 
-      // Step 2: Fallback to local auth (admin & teacher from config.json)
-      const localResult = await Auth.login(email, password);
-      if (localResult.success) {
-        if (localResult.role === 'admin')   window.location.href = 'dashboard-admin.html';
-        else if (localResult.role === 'teacher') window.location.href = 'dashboard-teacher.html';
-        return;
-      }
-
-      // Both failed
-      alertMsg.textContent = 'Invalid email or password.';
+      // Backend login failed
+      alertMsg.textContent = backendResult?.message || 'Invalid email or password.';
       alertEl.classList.remove('hidden');
     });
 

@@ -1308,28 +1308,15 @@
     document.getElementById('ask-ai-send').disabled=true;
     const thinkDiv=appendAIMsg('ai','⬡ Thinking…');
     try{
-      let aiText='';
-      const cfg=typeof AskAIConfig!=='undefined'?AskAIConfig:{};
-      const mode=cfg.MODE||'groq';
-      const sys=`You are an expert NIT Kurukshetra academic tutor. The student is studying ${_curPaper.subject} (${_curPaper.branchName}, Semester ${_curPaper.semester}, ${_curPaper.year}).\n\nExam question:\n${_curQ.number}: ${_curQ.text}${_curQ.marks?' ['+_curQ.marks+' marks]':''}\n\nExplain clearly, step by step. Use examples and code snippets where helpful. Be encouraging.`;
-      if(mode==='groq'){
-        const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.GROQ_API_KEY},body:JSON.stringify({model:cfg.GROQ_MODEL||'llama-3.3-70b-versatile',max_tokens:1024,temperature:0.7,messages:[{role:'system',content:sys},{role:'user',content:doubt}]})});
-        if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||'Groq API error '+r.status);}
-        aiText=(await r.json())?.choices?.[0]?.message?.content||'No response.';
-      } else if(mode==='rag'){
-        const r=await fetch(cfg.RAG_BACKEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question_context:_curQ.number+': '+_curQ.text,student_doubt:doubt,subject:_curPaper.subject,branch:_curPaper.branch,semester:String(_curPaper.semester),year:String(_curPaper.year)})});
-        const d=await r.json();aiText=d.answer||'No answer.';
-      } else {
-        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:doubt}]})});
-        aiText=(await r.json())?.content?.[0]?.text||'No response.';
-      }
+      const sys=`You are an expert NIT Kurukshetra academic tutor. Explain step by step.\n\nExam question context:\n${_curPaper.subject} - ${_curPaper.branchName} Sem ${_curPaper.semester} (${_curPaper.year})\nQuestion ${_curQ.number}: ${_curQ.text}${_curQ.marks?' ['+_curQ.marks+' marks]':''}`;
+      const query = `${sys}\n\nStudent Doubt: ${doubt}`;
+      
+      const res = await API.chat(query);
+      const aiText = res.answer || 'No response received. Please check backend.';
+      
       thinkDiv.querySelector('.chat-msg__bubble').innerHTML=fmtAI(aiText);
     }catch(err){
-      let msg='❌ '+err.message;
-      if(err.message.includes('API_KEY')||err.message.includes('api_key'))msg='🔑 Groq API key missing! Set GROQ_API_KEY in ask-ai-config.js. Sign up free at groq.com';
-      else if(err.message.includes('401'))msg='🔑 Invalid API key. Check groq.com';
-      else if(err.message.includes('429'))msg='⏳ Rate limit hit. Please wait a moment and try again.';
-      thinkDiv.querySelector('.chat-msg__bubble').textContent=msg;
+      thinkDiv.querySelector('.chat-msg__bubble').textContent='❌ ' + err.message;
     }
     document.getElementById('ask-ai-input').disabled=false;
     document.getElementById('ask-ai-send').disabled=false;
